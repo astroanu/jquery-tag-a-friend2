@@ -1,0 +1,5 @@
+@CHARSET "UTF-8";
+.tagfriends-wrapper{}
+.tagfriends-wrapper span{margin: 0 5px;background-color: #444}
+
+.tagfriends-tags-container{position: absolute;z-index:99999;height: 10px;background: red;top:0;left:0}
