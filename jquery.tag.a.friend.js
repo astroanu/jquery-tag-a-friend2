@@ -45,7 +45,9 @@
         this.anchorNode = this.anchorOffset = this.focusNode = this.focusOffset = 0;
         this.isCollapsed = true;
         this.suggestionsVisible = false;
-        this.lastw = "";
+        this.suggestionsDisabled = false;
+        this.lastw = "";        
+        
         //console.log(this.id);
 
         /*var el = document.getElementById(this.id);
@@ -61,7 +63,7 @@
         
         var instance = this;
 
-        $(this.el).bind('click keyup mouseup', function(){
+        $(this.el).bind('click keyup', function(){
         	var range = rangy.createRange();
         	range.selectNodeContents(this);
         	
@@ -77,30 +79,27 @@
         	console.log('focusNode ' + instance.focusNode.nodeValue);
         	console.log('focusOffset ' + instance.focusOffset);
         	console.log('isCollapsed ' + instance.isCollapsed);*/
+        	console.log('-----------------------------');
+        	console.log('suggdisd: '+instance.suggestionsDisabled);
+        	isSuggestible(instance, function(d){
+        		console.log('isSuggestible callback '+d);
+        		instance.suggestionsDisabled = d;
+        	});
+        	console.log('suggdisd2: '+instance.suggestionsDisabled);
         	
-        	if(isTag(instance) && instance.isCollapsed === true){
-        		suggest(instance);
+        	if(isTag(instance) && instance.isCollapsed === true && instance.suggestionsVisible === false){
+        		suggest(instance, function(d){
+        			console.log('suggest callback ' +d);
+        			instance.suggestionsDisabled = d;
+        		});
         	}
         	else{
-        		suggest(instance);
+        		hideSuggest(instance);
         	}
+        	
+        	console.log('suggdisd3: '+instance.suggestionsDisabled);
         });
         
-        /*$(this.el).bind('click', function(){
-        	var range = rangy.createRange();
-        	range.selectNodeContents(this);
-        	
-        	var sel = rangy.getSelection();
-        	
-        	var sp1 = document.createElement('span');
-        	sp1.appendChild(document.createTextNode("yo"));
-
-        	var sp2 = sel.anchorOffset;
-        	var parentDiv = this;
-
-        	//parentDiv.insertBefore(sp1, sp2);
-        });
-        */
         // Merge the options given by the user with the defaults
         this.options = $.extend({}, defaults, options)
 
@@ -134,6 +133,10 @@
         });
     };
     
+    var updateRange = function(i){
+    	
+    }
+    
     var getClosestBefore = function(text, offset){
     	for ( var int = offset; int > 0; int--) {
 			if(text[int] == '@'){
@@ -151,6 +154,23 @@
 		}
     	return text.length;
     }
+    
+    var isSuggestible = function(i, callback){
+    	var text = i.focusNode.nodeValue;
+    	if(text == null) text = '';
+    	var tags = text.split('@');
+    	
+    	var ws = getClosestBefore(text, i.focusOffset);
+    	var we = getClosestAfter(text, i.focusOffset);
+    	
+    	if(we == ws) we = text.length;
+    	
+    	var neww = text.substring(ws, we);
+    	
+    	console.log('new: '+ neww+' old: '+i.lastw);
+    	
+    	callback(neww == i.lastw);    	
+    }
 
     // Private function that is only called by the plugin
     var isTag = function(i) {
@@ -161,54 +181,85 @@
     	var ws = getClosestBefore(text, i.focusOffset);
     	var we = getClosestAfter(text, i.focusOffset);
     	
+    	//console.log(ws + ' ' + we);
+    	
     	if(we == ws) we = text.length;
     	
-    	i.lastw = text.substr(ws, we);
-    	console.log(i.lastw);
+    	i.lastw = text.substring(ws, we);
+
+    	//console.log('lastw: ' + i.lastw);
     	
-    	return i.lastw.trim().substr(0, 1) == '@';
+    	return i.lastw.trim().substring(0, 1) == '@';
     }
     
     var addTag = function(i, val, txt){
     	var range = rangy.createRange();
-    	range.selectNodeContents(i.el);
+    	range.selectNodeContents(i.anchorNode);
+    	range.setStart(i.anchorNode, i.anchorOffset);
+    	range.selectNode(i.anchorNode);
+    	range.deleteContents();
     	
-    	var sel = rangy.getSelection();
     	var sp1 = document.createElement('span');
     	$(sp1).attr('data-id', val);
-    	$(sp1).attr('contentEditable', 'false');
+    	sp1.contentEditable = false;
     	sp1.appendChild(document.createTextNode(txt));
     	
-    	var sp2 = sel.anchorOffset;
-    	i.el.insertBefore(sp1, sp2);
+    	range.insertNode(sp1);
     }
     
-    var hideSuggetions = function(i){
+    var hideSuggest = function(i){
     	i.suggs.hide();
     }
     
-    var showSuggetions = function(i){    	
-    	$.ajax({
-		  url: i.opts.url,
-		  context: document.body
-		}).done(function(data) {
-			$.each(data.ret.data, function(index, v){
-				var li = $('<li><a data-val="'+v.id+'" href="">'+v.text+'</a></li>');
-				$(i.suggs).append(li);
+    var suggest = function(i, callback){
+    	var q = i.lastw.substring(1);
+    	console.log('sug disabled: '+i.suggestionsDisabled);
+    	if(q !== '' && i.suggestionsDisabled == false){
+	    	var data = {};    	
+	    	data[i.opts.pageKey] = i.opts.pageStart;
+	    	data[i.opts.pagePerKey] = i.opts.pagePer;
+	    	data[i.opts.queryKey] = q;
+	    	
+	    	$.ajax({
+	    		url: i.opts.url,
+	    		type:'post',
+	    		data: data
+			}).done(function(data) {
+				/*for ( var int = 0; int < i.opts.dataObj.length; int++){
+					data = data[i.opts.dataObj[int]];
+					console.log(i.opts.dataObj[int]);
+				}*/
+				
+				var ret = data.ret.data;
+				
+				//console.log(ret.length);
+				
+				if(ret.length == 0){
+					console.log('empty data');
+					hideSuggest(i);
+					callback(true);
+				}
+				else{
+					$(i.suggs).empty();
+					
+					$.each(ret, function(index, v){
+						var li = $('<li><a data-val="'+v.id+'" href="">'+v.text+'</a></li>');
+						$(i.suggs).append(li);
+					});
+					
+					i.suggs.find('a').bind('click', function(e){
+				     	e.preventDefault();
+				      	addTag(i, $(this).data('val'), $(this).text());
+				       	return false;
+				    });
+					
+					var pos = $(i.tagger).offset();
+			    	pos.top = pos.top + $(i.tagger).height();
+			    	i.suggs.offset(pos).show();
+			    	callback(false);
+				}
 			});
-		});
-    	
-
-        i.suggs.find('a').bind('click', function(e){
-        	e.preventDefault();
-        	addTag(i, $(this).data('val'), $(this).text());
-        	return false;
-        });
-
-    	
-    	var pos = $(i.tagger).offset();
-    	pos.top = pos.top + $(i.tagger).height();
-    	i.suggs.offset(pos).show();
+    	}
     }
 
 })(jQuery, document, window);

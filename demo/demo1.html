@@ -10,8 +10,13 @@
 <script type="text/javascript">
 $(function() {
     $('#postbox').tagfriends2({
-    	url:'\data.json',
-    	requestObject:'ret.data'
+    	url:'\data.php',
+    	pageStart:1,
+    	pageKey:'curpage',
+    	pagePerKey:'pg_lmt',
+    	pagePer:10,
+    	queryKey:'q',
+    	dataObj:['ret','data']
     });
     
 });
