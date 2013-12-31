@@ -1,5 +1,14 @@
 @CHARSET "UTF-8";
-.tagfriends-wrapper{}
-.tagfriends-wrapper span{margin: 0 5px;background-color: #444}
+.tagfriends-wrapper{padding: 3px;}
+.tagfriends-wrapper .tag{cursor: pointer;}
+.tagfriends-wrapper, .tagfriends-wrapper span{-webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;}
 
 .tagfriends-tags-container{position: absolute;z-index:99999;height: 10px;background: red;top:0;left:0}
+
+
+
+/*
+theme
+*/
+.tagfriends-wrapper{border: thin solid #444;}
+.tagfriends-wrapper span{background-color: #28B8A7;border: thin solid #7E7E7E;}

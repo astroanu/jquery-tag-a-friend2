@@ -33,7 +33,7 @@
         this.element = element;
         this.id = $(this.element).prop('id')+'-tagger';
         
-        this.tagger = $('<div id="'+this.id+'" class="tagfriends-wrapper" contentEditable="true">asd <span contentEditable="false">test</span>asdas</div>');
+        this.tagger = $('<div id="'+this.id+'" class="tagfriends-wrapper" contentEditable="true"></div>');
     	this.suggs = $('<ul class="tagfriends-tags-container"></ul>').hide();
     	
     	$('body').append(this.suggs);
@@ -64,8 +64,8 @@
         var instance = this;
 
         $(this.el).bind('click keyup', function(){
-        	var range = rangy.createRange();
-        	range.selectNodeContents(this);
+        	instance.range = rangy.createRange();
+        	instance.range.selectNodeContents(this);
         	
         	var sel = rangy.getSelection();
         	instance.anchorNode = sel.nativeSelection.anchorNode;
@@ -193,18 +193,26 @@
     }
     
     var addTag = function(i, val, txt){
-    	var range = rangy.createRange();
-    	range.selectNodeContents(i.anchorNode);
-    	range.setStart(i.anchorNode, i.anchorOffset);
-    	range.selectNode(i.anchorNode);
-    	range.deleteContents();
+    	//var range = rangy.createRange();
+    	i.range.refresh();
+    	i.range.selectNodeContents(i.focusNode);
+    	i.range.setStart(i.focusNode, i.focusOffset);    	
     	
     	var sp1 = document.createElement('span');
     	$(sp1).attr('data-id', val);
+    	$(sp1).addClass('tag');
     	sp1.contentEditable = false;
     	sp1.appendChild(document.createTextNode(txt));
     	
-    	range.insertNode(sp1);
+    	i.range.insertNode(sp1);
+    	
+
+    	var ws = getClosestBefore(i.range.getSelection().toString(), i.focusOffset);
+    	var we = getClosestAfter(text, i.focusOffset);
+    	
+    	console.log(ws + ' ' + we);
+    	//i.range.selectNode(i.anchorNode);
+    	//i.range.deleteContents();
     }
     
     var hideSuggest = function(i){
