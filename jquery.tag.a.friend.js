@@ -33,7 +33,7 @@
         this.element = element;
         this.id = $(this.element).prop('id')+'-tagger';
         
-        this.tagger = $('<div id="'+this.id+'" class="tagfriends-wrapper" contentEditable="true">asd <span contentEditable="true">test</span>asdas</div>');
+        this.tagger = $('<div id="'+this.id+'" class="tagfriends-wrapper" contentEditable="true">asd <span contentEditable="false">test</span>asdas</div>');
     	this.suggs = $('<ul class="tagfriends-tags-container"></ul>').hide();
     	
     	$('body').append(this.suggs);
@@ -45,6 +45,7 @@
         this.anchorNode = this.anchorOffset = this.focusNode = this.focusOffset = 0;
         this.isCollapsed = true;
         this.suggestionsVisible = false;
+        this.lastw = "";
         //console.log(this.id);
 
         /*var el = document.getElementById(this.id);
@@ -71,14 +72,17 @@
         	instance.focusOffset = sel.focusOffset;
         	instance.isCollapsed = sel.isCollapsed;
         	
-        	console.log('anchorNode ' + instance.anchorNode.nodeValue);
+        	/*console.log('anchorNode ' + instance.anchorNode.nodeValue);
         	console.log('anchorOffset ' + instance.anchorOffset);
         	console.log('focusNode ' + instance.focusNode.nodeValue);
         	console.log('focusOffset ' + instance.focusOffset);
-        	console.log('isCollapsed ' + instance.isCollapsed);
+        	console.log('isCollapsed ' + instance.isCollapsed);*/
         	
         	if(isTag(instance) && instance.isCollapsed === true){
-        		showSuggetions(instance);
+        		suggest(instance);
+        	}
+        	else{
+        		suggest(instance);
         	}
         });
         
@@ -129,10 +133,40 @@
             }
         });
     };
+    
+    var getClosestBefore = function(text, offset){
+    	for ( var int = offset; int > 0; int--) {
+			if(text[int] == '@'){
+				return int;
+			}
+		}
+    	return 0;
+    }
+    
+    var getClosestAfter = function(text, offset){
+    	for ( var int = offset; int < text.length; int++) {
+			if(text[int] == '@'){
+				return int;
+			}
+		}
+    	return text.length;
+    }
 
     // Private function that is only called by the plugin
     var isTag = function(i) {
-    	return i.focusNode.nodeValue.trim().substr(0, 1) == '@';
+    	var text = i.focusNode.nodeValue;
+    	if(text == null) text = '';
+    	var tags = text.split('@');
+    	
+    	var ws = getClosestBefore(text, i.focusOffset);
+    	var we = getClosestAfter(text, i.focusOffset);
+    	
+    	if(we == ws) we = text.length;
+    	
+    	i.lastw = text.substr(ws, we);
+    	console.log(i.lastw);
+    	
+    	return i.lastw.trim().substr(0, 1) == '@';
     }
     
     var addTag = function(i, val, txt){
@@ -142,10 +176,15 @@
     	var sel = rangy.getSelection();
     	var sp1 = document.createElement('span');
     	$(sp1).attr('data-id', val);
+    	$(sp1).attr('contentEditable', 'false');
     	sp1.appendChild(document.createTextNode(txt));
     	
     	var sp2 = sel.anchorOffset;
     	i.el.insertBefore(sp1, sp2);
+    }
+    
+    var hideSuggetions = function(i){
+    	i.suggs.hide();
     }
     
     var showSuggetions = function(i){    	
