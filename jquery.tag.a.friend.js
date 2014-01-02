@@ -107,8 +107,9 @@
         	else{
         		hideSuggest(instance);
         	}
-
+        	
         	//console.log('suggdisd3: '+instance.suggestionsDisabled);
+        	
         });
         
         $(this.el).on('click', '.tag', function(){
@@ -116,6 +117,10 @@
         		$(this).parent().find('.tag').removeClass('active');
         		$(this).addClass('active');
         	}
+        });
+        
+        $(this.el).on('blur click keypress keyup', function(e){
+        	drawBBCode(instance);
         });
 
         // Merge the options given by the user with the defaults
@@ -151,29 +156,53 @@
         });
     };
     
+    var drawBBCode = function(i){
+    	var nodes = i.range.getNodes();
+    	var bb = ''; var ltxt = '';
+    	$.each(nodes, function(index, value){
+    		switch ($(value).prop('tagName')) {
+				case 'SPAN':
+					if($(value).hasClass('tag')){
+						bb += i.opts.tagFormat.replace('%?', $(value).data('id'));
+						ltxt = $(value).text();
+    				}
+					break;
+	
+				case undefined:
+					if( $(value).text() !=ltxt){
+						bb += ' ' + $(value).text() + ' ';
+					}
+					break;
+			}
+    	});
+    	bb = bb.replace( /[\s\n\r]+/g, ' ' ).trim();
+    	$(i.element).val(bb);
+    }
+    
     var deleteTag = function(i){
     	$(i.focusNode).parents('.tag').remove();
     }
     
     var endSpacer = function(i){
     	var str = i.focusNode.toString();
-    	var len = str.length;
-    	console.log(str.charCodeAt( len-1));
-    	console.log(str.substr(len, -1));
-    	
-    	if(str.substr(len, -1) != ' '){		    	
-	    	console.log(str);    
-	    	i.range.setStart(i.focusNode, i.focusOffset);
-	    	i.range.setEnd(i.focusNode, i.focusOffset);
-	    	var s = document.createTextNode(' ');
-	    	i.range.insertNode(s);  
-	    	//i.range.collapseToPoint(i.focusNode, str.length);
-	    	
-	    	i.range.setStartAfter(s);
-	    	i.range.setEndAfter(s); 
-	    	rangy.getSelection().removeAllRanges();
-	    	rangy.getSelection().addRange(i.range);
-    	}
+	 	var len = str.length;
+	 	console.log(str.charCodeAt( len-1));
+	 	console.log(str.substr(len, -1));
+	 	//var s = document.createTextNode(' ');
+	 	//$(i.el).append(s);
+    	         
+	 	if(str.substr(len, -1) == null){                 
+	 		console.log(str);    
+	 		i.range.setStart(i.focusNode, i.focusOffset);
+	 		i.range.setEnd(i.focusNode, i.focusOffset);
+	 		var s = document.createTextNode(' ');
+	 		i.range.insertNode(s);  
+	 		//i.range.collapseToPoint(i.focusNode, str.length);
+	        
+	 		i.range.setStartAfter(s);
+	 		i.range.setEndAfter(s); 
+	 		//rangy.getSelection().removeAllRanges();
+	 	}
     }
     
     var getClosestBefore = function(text, offset){
@@ -258,11 +287,14 @@
     	i.range.deleteContents();
     	
     	i.range.selectNodeContents(i.focusNode);
+    	drawBBCode(i);
     	
     	i.range.setStartAfter(sp1);
     	i.range.setEndAfter(sp1); 
     	rangy.getSelection().removeAllRanges();
     	rangy.getSelection().addRange(i.range);
+    	
+    	drawBBCode(i);
     }
     
     var hideSuggest = function(i){
@@ -308,6 +340,7 @@
 					i.suggs.find('a').bind('click', function(e){
 				     	e.preventDefault();
 				      	addTag(i, $(this).data('val'), $(this).text());
+				      	drawBBCode(i);
 				       	return false;
 				    });
 					
