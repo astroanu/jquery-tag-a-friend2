@@ -40,7 +40,7 @@
         
         $(this.element).before(this.tagger);  
         
-        this.range = rangy.createRange();
+        this.range = rangy.createRangyRange();
         this.el = document.getElementById(this.id);
         this.anchorNode = this.anchorOffset = this.focusNode = this.focusOffset = 0;
         this.isCollapsed = true;
@@ -63,8 +63,9 @@
         
         var instance = this;
 
-        $(this.el).bind('click keyup', function(){
-        	instance.range = rangy.createRange();
+        $(this.el).bind('click keyup', function(e){
+        	
+        	instance.range = rangy.createRangyRange();
         	instance.range.selectNodeContents(this);
         	
         	var sel = rangy.getSelection();
@@ -79,17 +80,22 @@
         	console.log('focusNode ' + instance.focusNode.nodeValue);
         	console.log('focusOffset ' + instance.focusOffset);
         	console.log('isCollapsed ' + instance.isCollapsed);*/
-        	console.log('-----------------------------');
-        	console.log('suggdisd: '+instance.suggestionsDisabled);
+        	//console.log('-----------------------------');
+        	//console.log('suggdisd: '+instance.suggestionsDisabled);        	
+        	
+        	if(e.keyCode == 8 || e.keyCode == 39){
+        		endSpacer(instance);
+        	}
+        	
         	isSuggestible(instance, function(d){
-        		console.log('isSuggestible callback '+d);
+        		//console.log('isSuggestible callback '+d);
         		instance.suggestionsDisabled = d;
         	});
         	console.log('suggdisd2: '+instance.suggestionsDisabled);
         	
         	if(isTag(instance) && instance.isCollapsed === true && instance.suggestionsVisible === false){
         		suggest(instance, function(d){
-        			console.log('suggest callback ' +d);
+        			//console.log('suggest callback ' +d);
         			instance.suggestionsDisabled = d;
         		});
         	}
@@ -97,7 +103,7 @@
         		hideSuggest(instance);
         	}
         	
-        	console.log('suggdisd3: '+instance.suggestionsDisabled);
+        	//console.log('suggdisd3: '+instance.suggestionsDisabled);
         });
         
         // Merge the options given by the user with the defaults
@@ -133,8 +139,19 @@
         });
     };
     
-    var updateRange = function(i){
-    	
+    var endSpacer = function(i){
+    	var str = i.focusNode.toString();
+    	var len = str.length;
+    	console.log(str.charCodeAt( len-1));
+    	console.log(str.substr(len, -6));
+    	if(str.substr(len, -1) != ' '){
+	    	
+	    	console.log(str);    
+	    	i.range.setStart(i.focusNode, i.focusOffset);
+	    	var s = document.createTextNode('\u00a0');
+	    	i.range.insertNode(s);  
+	    	i.range.collapseToPoint(i.focusNode, str.length);
+    	}
     }
     
     var getClosestBefore = function(text, offset){
@@ -187,14 +204,12 @@
     	
     	i.lastw = text.substring(ws, we);
 
-    	//console.log('lastw: ' + i.lastw);
+    	console.log('lastw: ' + i.lastw);
     	
     	return i.lastw.trim().substring(0, 1) == '@';
     }
     
     var addTag = function(i, val, txt){
-    	//var range = rangy.createRange();
-    	i.range.refresh();
     	i.range.selectNodeContents(i.focusNode);
     	i.range.setStart(i.focusNode, i.focusOffset);    	
     	
@@ -205,14 +220,23 @@
     	sp1.appendChild(document.createTextNode(txt));
     	
     	i.range.insertNode(sp1);
-    	
 
-    	var ws = getClosestBefore(i.range.getSelection().toString(), i.focusOffset);
-    	var we = getClosestAfter(text, i.focusOffset);
+    	i.range.selectNode(i.anchorNode);
+    	var ds = getClosestBefore(i.range.toString(), i.range.toString().length-i.lastw.length);
+    	var de = i.focusOffset;
     	
-    	console.log(ws + ' ' + we);
-    	//i.range.selectNode(i.anchorNode);
-    	//i.range.deleteContents();
+    	console.log('delete ' + ds+ ' ' + de);
+    	
+    	i.range.setStart(i.focusNode, ds);
+    	i.range.setEnd(i.focusNode, de);
+    	i.range.deleteContents();
+    	
+    	i.range.selectNodeContents(i.focusNode);
+    	
+    	i.range.setStartAfter(sp1);
+    	i.range.setEndAfter(sp1); 
+    	rangy.getSelection().removeAllRanges();
+    	rangy.getSelection().addRange(i.range);
     }
     
     var hideSuggest = function(i){
