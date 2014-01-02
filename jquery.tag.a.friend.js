@@ -46,6 +46,7 @@
         this.isCollapsed = true;
         this.suggestionsVisible = false;
         this.suggestionsDisabled = false;
+        this.activeTagNode = null;
         this.lastw = "";        
         
         //console.log(this.id);
@@ -87,11 +88,15 @@
         		endSpacer(instance);
         	}
         	
+        	if(e.keyCode == 8 || e.keyCode == 46){
+        		deleteTag(instance);
+        	}
+        	
         	isSuggestible(instance, function(d){
         		//console.log('isSuggestible callback '+d);
         		instance.suggestionsDisabled = d;
         	});
-        	console.log('suggdisd2: '+instance.suggestionsDisabled);
+        	//console.log('suggdisd2: '+instance.suggestionsDisabled);
         	
         	if(isTag(instance) && instance.isCollapsed === true && instance.suggestionsVisible === false){
         		suggest(instance, function(d){
@@ -102,10 +107,17 @@
         	else{
         		hideSuggest(instance);
         	}
-        	
+
         	//console.log('suggdisd3: '+instance.suggestionsDisabled);
         });
         
+        $(this.el).on('click', '.tag', function(){
+        	if($(this).hasClass('tag')){
+        		$(this).parent().find('.tag').removeClass('active');
+        		$(this).addClass('active');
+        	}
+        });
+
         // Merge the options given by the user with the defaults
         this.options = $.extend({}, defaults, options)
 
@@ -139,18 +151,28 @@
         });
     };
     
+    var deleteTag = function(i){
+    	$(i.focusNode).parents('.tag').remove();
+    }
+    
     var endSpacer = function(i){
     	var str = i.focusNode.toString();
     	var len = str.length;
     	console.log(str.charCodeAt( len-1));
-    	console.log(str.substr(len, -6));
-    	if(str.substr(len, -1) != ' '){
-	    	
+    	console.log(str.substr(len, -1));
+    	
+    	if(str.substr(len, -1) != ' '){		    	
 	    	console.log(str);    
 	    	i.range.setStart(i.focusNode, i.focusOffset);
-	    	var s = document.createTextNode('\u00a0');
+	    	i.range.setEnd(i.focusNode, i.focusOffset);
+	    	var s = document.createTextNode(' ');
 	    	i.range.insertNode(s);  
-	    	i.range.collapseToPoint(i.focusNode, str.length);
+	    	//i.range.collapseToPoint(i.focusNode, str.length);
+	    	
+	    	i.range.setStartAfter(s);
+	    	i.range.setEndAfter(s); 
+	    	rangy.getSelection().removeAllRanges();
+	    	rangy.getSelection().addRange(i.range);
     	}
     }
     
@@ -217,7 +239,11 @@
     	$(sp1).attr('data-id', val);
     	$(sp1).addClass('tag');
     	sp1.contentEditable = false;
-    	sp1.appendChild(document.createTextNode(txt));
+    	
+    	var spc = document.createElement('span');
+    	$(spc).addClass('tag-inner');
+    	spc.appendChild(document.createTextNode(txt));
+    	sp1.appendChild(spc);
     	
     	i.range.insertNode(sp1);
 
@@ -225,7 +251,7 @@
     	var ds = getClosestBefore(i.range.toString(), i.range.toString().length-i.lastw.length);
     	var de = i.focusOffset;
     	
-    	console.log('delete ' + ds+ ' ' + de);
+    	//console.log('delete ' + ds+ ' ' + de);
     	
     	i.range.setStart(i.focusNode, ds);
     	i.range.setEnd(i.focusNode, de);

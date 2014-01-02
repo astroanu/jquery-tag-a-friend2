@@ -1,8 +1,8 @@
 @CHARSET "UTF-8";
 .tagfriends-wrapper{padding: 3px;}
-.tagfriends-wrapper .tag{cursor: pointer;}
-.tagfriends-wrapper, .tagfriends-wrapper span{-webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;}
-
+.tagfriends-wrapper .tag{cursor: pointer;margin: 0 3px;}
+.tagfriends-wrapper .tag-inner{padding: 0 3px;}
+.tagfriends-wrapper, .tagfriends-wrapper .tag{-webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;}
 .tagfriends-tags-container{position: absolute;z-index:99999;height: 10px;background: red;top:0;left:0}
 
 
@@ -11,4 +11,5 @@
 theme
 */
 .tagfriends-wrapper{border: thin solid #444;}
-.tagfriends-wrapper span{background-color: #28B8A7;border: thin solid #7E7E7E;}
+.tagfriends-wrapper .tag-inner{background-color: #28B8A7;border: thin solid #7E7E7E;}
+.tagfriends-wrapper .tag.active .tag-inner{background-color: #2FDBC7;}
