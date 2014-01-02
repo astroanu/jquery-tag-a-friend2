@@ -40,6 +40,7 @@
         
         $(this.element).before(this.tagger);  
         
+        rangy.init();
         this.range = rangy.createRangyRange();
         this.el = document.getElementById(this.id);
         this.anchorNode = this.anchorOffset = this.focusNode = this.focusOffset = 0;
@@ -175,8 +176,10 @@
 					break;
 			}
     	});
-    	bb = bb.replace( /[\s\n\r]+/g, ' ' ).trim();
-    	$(i.element).val(bb);
+
+
+		bb = bb.replace( /[\s\n\r]+/g, ' ' );
+		$(i.element).val(bb);
     }
     
     var deleteTag = function(i){
@@ -184,25 +187,27 @@
     }
     
     var endSpacer = function(i){
-    	var str = i.focusNode.toString();
-	 	var len = str.length;
-	 	console.log(str.charCodeAt( len-1));
-	 	console.log(str.substr(len, -1));
-	 	//var s = document.createTextNode(' ');
-	 	//$(i.el).append(s);
-    	         
-	 	if(str.substr(len, -1) == null){                 
-	 		console.log(str);    
-	 		i.range.setStart(i.focusNode, i.focusOffset);
-	 		i.range.setEnd(i.focusNode, i.focusOffset);
-	 		var s = document.createTextNode(' ');
-	 		i.range.insertNode(s);  
-	 		//i.range.collapseToPoint(i.focusNode, str.length);
-	        
-	 		i.range.setStartAfter(s);
-	 		i.range.setEndAfter(s); 
-	 		//rangy.getSelection().removeAllRanges();
-	 	}
+    	if(i.focusNode != null){
+	    	var str = i.focusNode.toString();
+		 	var len = str.length;
+		 	console.log(str.charCodeAt( len-1));
+		 	console.log(str.substr(len, -1));
+		 	//var s = document.createTextNode(' ');
+		 	//$(i.el).append(s);
+	    	         
+		 	if(str.substr(len, -1) == null){                 
+		 		console.log(str);    
+		 		i.range.setStart(i.focusNode, i.focusOffset);
+		 		i.range.setEnd(i.focusNode, i.focusOffset);
+		 		var s = document.createTextNode(' ');
+		 		i.range.insertNode(s);  
+		 		//i.range.collapseToPoint(i.focusNode, str.length);
+		        
+		 		i.range.setStartAfter(s);
+		 		i.range.setEndAfter(s); 
+		 		//rangy.getSelection().removeAllRanges();
+		 	}
+    	}
     }
     
     var getClosestBefore = function(text, offset){
@@ -224,40 +229,44 @@
     }
     
     var isSuggestible = function(i, callback){
-    	var text = i.focusNode.nodeValue;
-    	if(text == null) text = '';
-    	var tags = text.split('@');
-    	
-    	var ws = getClosestBefore(text, i.focusOffset);
-    	var we = getClosestAfter(text, i.focusOffset);
-    	
-    	if(we == ws) we = text.length;
-    	
-    	var neww = text.substring(ws, we);
-    	
-    	console.log('new: '+ neww+' old: '+i.lastw);
-    	
-    	callback(neww == i.lastw);    	
+    	if(i.focusNode != null){
+	    	var text = i.focusNode.nodeValue;
+	    	if(text == null) text = '';
+	    	var tags = text.split('@');
+	    	
+	    	var ws = getClosestBefore(text, i.focusOffset);
+	    	var we = getClosestAfter(text, i.focusOffset);
+	    	
+	    	if(we == ws) we = text.length;
+	    	
+	    	var neww = text.substring(ws, we);
+	    	
+	    	console.log('new: '+ neww+' old: '+i.lastw);
+	    	
+	    	callback(neww == i.lastw); 
+    	}
     }
 
     // Private function that is only called by the plugin
     var isTag = function(i) {
-    	var text = i.focusNode.nodeValue;
-    	if(text == null) text = '';
-    	var tags = text.split('@');
-    	
-    	var ws = getClosestBefore(text, i.focusOffset);
-    	var we = getClosestAfter(text, i.focusOffset);
-    	
-    	//console.log(ws + ' ' + we);
-    	
-    	if(we == ws) we = text.length;
-    	
-    	i.lastw = text.substring(ws, we);
-
-    	console.log('lastw: ' + i.lastw);
-    	
-    	return i.lastw.trim().substring(0, 1) == '@';
+    	if(i.focusNode != null){
+	    	var text = i.focusNode.nodeValue;
+	    	if(text == null) text = '';
+	    	var tags = text.split('@');
+	    	
+	    	var ws = getClosestBefore(text, i.focusOffset);
+	    	var we = getClosestAfter(text, i.focusOffset);
+	    	
+	    	//console.log(ws + ' ' + we);
+	    	
+	    	if(we == ws) we = text.length;
+	    	
+	    	i.lastw = text.substring(ws, we);
+	
+	    	console.log('lastw: ' + i.lastw);
+	    	
+	    	return i.lastw.trim().substring(0, 1) == '@';
+    	}
     }
     
     var addTag = function(i, val, txt){
