@@ -122,6 +122,9 @@
         
         $(this.el).on('blur click keypress keyup', function(e){
         	drawBBCode(instance);
+        	if($(instance.anchorNode).parents('.tag').length == 0){
+        		$(this).find('.tag').removeClass('active');
+        	}
         });
 
         // Merge the options given by the user with the defaults
@@ -349,13 +352,15 @@
 					i.suggs.find('a').bind('click', function(e){
 				     	e.preventDefault();
 				      	addTag(i, $(this).data('val'), $(this).text());
+				      	hideSuggest(i);
 				      	drawBBCode(i);
 				       	return false;
 				    });
 					
 					var pos = $(i.tagger).offset();
 			    	pos.top = pos.top + $(i.tagger).height();
-			    	i.suggs.offset(pos).show();
+			    	i.suggs.css({top:pos.top,left:pos.left});
+			    	i.suggs.show();
 			    	callback(false);
 				}
 			});
