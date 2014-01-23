@@ -195,21 +195,8 @@
 		 	var len = str.length;
 		 	console.log(str.charCodeAt( len-1));
 		 	console.log(str.substr(len, -1));
-		 	//var s = document.createTextNode(' ');
-		 	//$(i.el).append(s);
-	    	         
-		 	if(str.substr(len, -1) == null){                 
-		 		console.log(str);    
-		 		i.range.setStart(i.focusNode, i.focusOffset);
-		 		i.range.setEnd(i.focusNode, i.focusOffset);
-		 		var s = document.createTextNode(' ');
-		 		i.range.insertNode(s);  
-		 		//i.range.collapseToPoint(i.focusNode, str.length);
-		        
-		 		i.range.setStartAfter(s);
-		 		i.range.setEndAfter(s); 
-		 		//rangy.getSelection().removeAllRanges();
-		 	}
+		 	var s = document.createTextNode(' ');
+		 	$(i.el).append(s);
     	}
     }
     
