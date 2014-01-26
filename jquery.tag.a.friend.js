@@ -32,7 +32,8 @@
     	dataObj:['ret','data'],
     	tagFormat:'[@%?]',
     	allowDuplicates:false,
-    	debug:false
+    	debug:false,
+    	scrape:null
     };
     
     //indexOf for old browsers
@@ -74,6 +75,7 @@
         this.activeTagNode = null;
         this.lastw = "";     
         this.tagged = [];
+        this.link = '';
 
         var instance = this;
 
@@ -137,7 +139,7 @@
             	instance.suggestionsHover = false;
             }
         }, function(){
-        	console.log(instance.suggestionsHover);
+        	//console.log(instance.suggestionsHover);
         });
         
         $(this.suggs).on('keypress keyup', 'a', function(e){
@@ -166,7 +168,7 @@
 	        		txt = e.originalEvent.clipboardData.getData('Text');
 	        	}else if(window !== undefined){
 	        		txt = window.clipboardData.getData('Text');
-	        	}
+	        	}        	
 	
 	        	var p = document.createTextNode(txt);
 	        	instance.range.selectNodeContents(instance.focusNode);
@@ -178,9 +180,15 @@
 		    	instance.range.setEndAfter(p); 
 		    	rangy.getSelection().removeAllRanges();
 		    	rangy.getSelection().addRange(instance.range);
+		    	
+	        	
+	        	if(isUrl(txt) === true && instance.link == ''){	        		
+	        		scrapeUrl(instance, txt);
+	        		instance.link = txt;
+	        	}	
         	}
         	catch(e){
-        		if(instance.opts.debug === true){console.log(e);}       		
+        		if(instance.opts.debug === true){/*console.log(e);*/}       		
         	}
     	});
         
@@ -231,13 +239,17 @@
 
     $.fn[pluginName] = function(methodOrOptions) {
     	var methods = {
-	        refresh : function() { 
-
+			refresh : function() { 
+				drawBBCode($(this).data('plugin_' + pluginName));
+	        },
+	        value:function(){
+	        	drawBBCode($(this).data('plugin_' + pluginName));
+	        	return $($(this).data('plugin_' + pluginName).element).val();
 	        }
 	    };
         // Iterate through each DOM element and return it
     	
-    	if ( methods[methodOrOptions] ) {
+    	if (methods[methodOrOptions] ) {
             return methods[ methodOrOptions ].apply( this, Array.prototype.slice.call( arguments, 1 ));
         } else if ( typeof methodOrOptions === 'object' || ! methodOrOptions ) {
             // Default to "init"
@@ -251,6 +263,17 @@
             $.error( 'Method ' +  methodOrOptions + ' does not exist on jQuery.' + pluginName);
         }        
     };
+    
+    var isUrl = function(s){
+    	var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+    	return regexp.test(s);
+    }
+    
+    var scrapeUrl = function(i, url){
+		if(typeof i.opts.scrape == 'function'){
+			i.opts.scrape(url, i.tagger);
+		}
+    }
     
     var drawBBCode = function(i){
     	try{
@@ -280,7 +303,7 @@
 	    	}
 	    }
 		catch(e){
-			if(i.opts.debug === true){console.log(e);}       		
+			if(i.opts.debug === true){/*console.log(e);*/}       		
 		}
     }
     
@@ -415,7 +438,7 @@
 	    	if(i.opts.allowDuplicates === false){
 	    		i.tagged.push(val);
 	    	}	    	
-	    	
+	    	i.tagger.trigger('click');
 	    	drawBBCode(i);	
     	}
     }
