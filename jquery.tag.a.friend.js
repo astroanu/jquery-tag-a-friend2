@@ -253,34 +253,45 @@
     };
     
     var drawBBCode = function(i){
-    	if(i.range != null){
-	    	var nodes = i.range.getNodes();
-	    	var bb = ''; var ltxt = '';
-	    	$.each(nodes, function(index, value){
-	    		switch ($(value).prop('tagName')) {
-					case 'SPAN':
-						if($(value).hasClass('tag')){
-							bb += i.opts.tagFormat.replace('%?', $(value).data('id'));
-							ltxt = $(value).text();
-	    				}
-						break;
+    	try{
+	    	if(i.range != null){
+		    	var nodes = i.range.getNodes();
+		    	var bb = ''; var ltxt = '';
+		    	$.each(nodes, function(index, value){
+		    		switch ($(value).prop('tagName')) {
+						case 'SPAN':
+							if($(value).hasClass('tag')){
+								bb += i.opts.tagFormat.replace('%?', $(value).data('id'));
+								ltxt = $(value).text();
+		    				}
+							break;
+			
+						case undefined:
+							if( $(value).text() !=ltxt){
+								bb += ' ' + $(value).text() + ' ';
+							}
+							break;
+					}
+		    	});
 		
-					case undefined:
-						if( $(value).text() !=ltxt){
-							bb += ' ' + $(value).text() + ' ';
-						}
-						break;
-				}
-	    	});
-	
-	
-			bb = bb.replace( /[\s\n\r]+/g, ' ' );
-			$(i.element).val(bb);
-    	}
+		
+				bb = bb.replace( /[\s\n\r]+/g, ' ' );
+				$(i.element).val(bb);
+	    	}
+	    }
+		catch(e){
+			if(i.opts.debug === true){console.log(e);}       		
+		}
     }
     
     var deleteTag = function(i){
-    	$(i.focusNode).parents('.tag').remove();
+    	var tag = $(i.focusNode).parents('.tag');
+    	for (var key in i.tagged) {
+    	    if (i.tagged[key] == tag.data('id')) {
+    	    	i.tagged.splice(key, 1);
+    	    	tag.remove();
+    	    }
+    	}    	
     }
     
     var endSpacer = function(i){
