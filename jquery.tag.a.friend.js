@@ -31,7 +31,8 @@
     	queryKey:'q',
     	dataObj:['ret','data'],
     	tagFormat:'[@%?]',
-    	allowDuplicates:false
+    	allowDuplicates:false,
+    	debug:false
     };
     
     //indexOf for old browsers
@@ -157,26 +158,36 @@
         });
         
         $(this.el).on('paste', function (e) {
-        	e.preventDefault();
-        	var txt = '';
-        	
-        	if(e.originalEvent.clipboardData !== undefined){
-        		txt = e.originalEvent.clipboardData.getData('Text');
-        	}else if(window !== undefined){
-        		txt = window.clipboardData.getData('Text');
+        	try{
+	        	e.preventDefault();
+	        	var txt = '';
+	        	
+	        	if(e.originalEvent.clipboardData !== undefined){
+	        		txt = e.originalEvent.clipboardData.getData('Text');
+	        	}else if(window !== undefined){
+	        		txt = window.clipboardData.getData('Text');
+	        	}
+	
+	        	var p = document.createTextNode(txt);
+	        	instance.range.selectNodeContents(instance.focusNode);
+	        	instance.range.setStart(instance.focusNode, instance.focusOffset);    	
+		    	
+		    	instance.range.insertNode(p);
+		    	
+		    	instance.range.setStartAfter(p);
+		    	instance.range.setEndAfter(p); 
+		    	rangy.getSelection().removeAllRanges();
+		    	rangy.getSelection().addRange(instance.range);
         	}
-
-        	var p = document.createTextNode(txt);
-        	instance.range.selectNodeContents(instance.focusNode);
-        	instance.range.setStart(instance.focusNode, instance.focusOffset);    	
-	    	
-	    	instance.range.insertNode(p);
-	    	
-	    	instance.range.setStartAfter(p);
-	    	instance.range.setEndAfter(p); 
-	    	rangy.getSelection().removeAllRanges();
-	    	rangy.getSelection().addRange(instance.range);
+        	catch(e){
+        		if(instance.opts.debug === true){console.log(e);}       		
+        	}
     	});
+        
+        $(this.el).on('paste', '.tag', function(e){ 
+        	e.preventDefault();
+        	return false;
+        });
         
         $(this.el).on('click', '.tag', function(){        	
         	if($(this).hasClass('tag')){
@@ -196,7 +207,7 @@
         });
 
         // Merge the options given by the user with the defaults
-        this.options = $.extend({}, defaults, options)
+        this.options = $.extend({}, defaults, options);
 
         // Attach data to the element
         this.$el      = $(element);
@@ -382,7 +393,8 @@
 	    	i.range.deleteContents();
 	    	
 	    	i.range.selectNodeContents(i.focusNode);
-	    	drawBBCode(i);
+	    	
+	    	endSpacer(i);
 	    	
 	    	i.range.setStartAfter(sp1);
 	    	i.range.setEndAfter(sp1); 
