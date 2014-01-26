@@ -1,12 +1,11 @@
 /**
- * PLUGIN_NAME
- * Version: VERSION
- * URL: URL
- * Description: DESCRIPTION
- * Requires: JQUERY_VERSION, OTHER_PLUGIN(S), ETC.
- * Author: AUTHOR (AUTHOR_URL)
- * Copyright: Copyright 2013 YOUR_NAME
- * License: LICENSE_INFO
+ * tagfriends2
+ * Version: 2.0
+ * URL: http://astroanu.github.io/jquery-tag-a-friend2/
+ * Description: A facebook-like taggin interface 
+ * Author: Anuradha Jayathilaka (https://github.com/astroanu)
+ * Copyright: Copyright 2013 Anuradha Jayathilaka
+ * License: MIT
  */
 
 // Plugin closure wrapper
