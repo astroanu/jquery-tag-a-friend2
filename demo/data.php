@@ -12,4 +12,4 @@ foreach ($array as $person) {
 }
 
 header('Content-type: application/json');
-echo json_encode(array('ret' => array('data' => $result)));
+echo json_encode(array('ret' => array('data' => $array)));
