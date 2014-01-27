@@ -1,5 +1,5 @@
 /**
- * tagfriends2
+ * jquery-tag-a-friend2
  * Version: 2.0
  * URL: http://astroanu.github.io/jquery-tag-a-friend2/
  * Description: A facebook-like taggin interface 
@@ -8,19 +8,9 @@
  * License: MIT
  */
 
-// Plugin closure wrapper
-// Uses dollar, but calls jQuery to prevent conflicts with other libraries
-// Semicolon to prevent breakage with concatenation
-// Pass in window as local variable for efficiency (could do same for document)
-// Pass in undefined to prevent mutation in ES3
 ;(function($, document, window, undefined) {
-    // Optional, but considered best practice by some
     "use strict";
-
-    // Name the plug-in so it's only in one place
     var pluginName = 'tagfriends2';
-
-    // Default options for the plug-in as a simple object
     var defaults = {
 		url:'',
     	pageStart:1,
@@ -34,10 +24,9 @@
     	debug:false,
     	scrape:null
     };
-    
-    //indexOf for old browsers
+
     if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function (elt /*, from*/) {
+        Array.prototype.indexOf = function (elt) {
             var len = this.length >>> 0;
             var from = Number(arguments[1]) || 0;
             from = (from < 0) ? Math.ceil(from) : Math.floor(from);
@@ -50,8 +39,6 @@
         };
     }
 
-    // Plug-in constructor
-    // This is the boilerplate to set up the plug-in to keep our actual logic in one place
     function Plugin(element, options) {
         this.element = element;
         this.id = $(this.element).prop('id')+'-tagger';
@@ -88,15 +75,7 @@
         	instance.focusNode = sel.focusNode;
         	instance.focusOffset = sel.focusOffset;
         	instance.isCollapsed = sel.isCollapsed;
-        	
-        	/*console.log('anchorNode ' + instance.anchorNode.nodeValue);
-        	console.log('anchorOffset ' + instance.anchorOffset);
-        	console.log('focusNode ' + instance.focusNode.nodeValue);
-        	console.log('focusOffset ' + instance.focusOffset);
-        	console.log('isCollapsed ' + instance.isCollapsed);*/
-        	//console.log('-----------------------------');
-        	//console.log('suggdisd: '+instance.suggestionsDisabled);        	
-        	
+
         	if(e.keyCode == 8 || e.keyCode == 39){
         		endSpacer(instance);
         	}
@@ -110,20 +89,16 @@
         	}
         	
         	isSuggestible(instance, function(d){
-        		//console.log('isSuggestible callback '+d);
         		instance.suggestionsDisabled = d;
         	});
-        	//console.log('suggdisd2: '+instance.suggestionsDisabled);
         	if(isTag(instance) === true && instance.isCollapsed === true && instance.suggestionsVisible === false){
         		suggest(instance, function(d){
-        			//console.log('suggest callback ' +d);
         			instance.suggestionsDisabled = d;
         		});
         	}
         	else{
         		hideSuggest(instance);
         	}
-        	//console.log('suggdisd3: '+instance.suggestionsDisabled);
         });
         
         $(this.suggs).on('scroll', function(e) {
@@ -138,7 +113,6 @@
             	instance.suggestionsHover = false;
             }
         }, function(){
-        	//console.log(instance.suggestionsHover);
         });
         
         $(this.suggs).on('keypress keyup', 'a', function(e){
@@ -187,7 +161,7 @@
 	        	}	
         	}
         	catch(e){
-        		if(instance.opts.debug === true){/*console.log(e);*/}       		
+        		if(instance.opts.debug === true){}       		
         	}
     	});
         
@@ -213,10 +187,8 @@
         	}
         });
 
-        // Merge the options given by the user with the defaults
         this.options = $.extend({}, defaults, options);
 
-        // Attach data to the element
         this.$el      = $(element);
         this.$el.data(name, this);
 
@@ -230,7 +202,6 @@
     }
 
     Plugin.prototype = {
-        // Public functions accessible to users
         init: function() {
         	
         }
@@ -246,14 +217,10 @@
 	        	return $($(this).data('plugin_' + pluginName).element).val();
 	        }
 	    };
-        // Iterate through each DOM element and return it
-    	
     	if (methods[methodOrOptions] ) {
             return methods[ methodOrOptions ].apply( this, Array.prototype.slice.call( arguments, 1 ));
         } else if ( typeof methodOrOptions === 'object' || ! methodOrOptions ) {
-            // Default to "init"
         	return this.each(function() {
-                // prevent multiple instantiations
                 if (!$.data(this, 'plugin_' + pluginName)) {
                     $.data(this, 'plugin_' + pluginName, new Plugin(this, methodOrOptions));
                 }
@@ -302,7 +269,7 @@
 	    	}
 	    }
 		catch(e){
-			if(i.opts.debug === true){/*console.log(e);*/}       		
+			if(i.opts.debug === true){}       		
 		}
     }
     
@@ -320,8 +287,6 @@
     	if(i.focusNode != null){
 	    	var str = i.focusNode.toString();
 		 	var len = str.length;
-		 	//console.log(str.charCodeAt( len-1));
-		 	//console.log(str.substr(len, -1));
 		 	if(str.substr(len, -1) != ' '){
 		 		var s = document.createTextNode(' ');
 			 	$(i.el).append(s);
@@ -360,14 +325,10 @@
 	    	if(we == ws) we = text.length;
 	    	
 	    	var neww = text.substring(ws, we);
-	    	
-	    	//console.log('new: '+ neww+' old: '+i.lastw);
-	    	
 	    	callback(neww == i.lastw); 
     	}
     }
 
-    // Private function that is only called by the plugin
     var isTag = function(i) {
     	if(i.focusNode != null){
 	    	var text = i.focusNode.nodeValue;
@@ -376,15 +337,11 @@
 
 	    	var ws = getClosestBefore(text, i.focusOffset);
 	    	var we = getClosestAfter(text, i.focusOffset);
-	    	
-	    	//console.log(ws + ' ' + we);
-	    	
+
 	    	if(we == ws) we = text.length;
 	    	
 	    	i.lastw = text.substring(ws, we);
-	
-	    	//console.log('lastw: ' + i.lastw);
-	    	
+
 	    	var tl = $.trim(i.lastw);
 	    	return tl.substring(0, 1) == '@';
     	}
@@ -418,9 +375,7 @@
 	    	if(ds == 0 && i.range.toString().length - i.lastw.length > 0){
 	    		ds = i.range.toString().length - i.lastw.length;
 	    	}
-	    	
-	    	//console.log('delete ' + ds+ ' ' + de);
-	
+
 	    	i.range.setStart(i.focusNode, ds);
 	    	i.range.setEnd(i.focusNode, de);
 	    	i.range.deleteContents();
@@ -448,7 +403,6 @@
     
     var suggest = function(i, callback){
     	var q = i.lastw.substring(1);
-    	//console.log('sug disabled: '+i.suggestionsDisabled);
     	if(q !== '' && i.suggestionsDisabled == false){
 	    	var data = {};    	
 	    	data[i.opts.pageKey] = i.opts.pageStart;
@@ -459,18 +413,9 @@
 	    		url: i.opts.url,
 	    		type:'post',
 	    		data: data
-			}).done(function(data) {
-				/*for ( var int = 0; int < i.opts.dataObj.length; int++){
-					data = data[i.opts.dataObj[int]];
-					console.log(i.opts.dataObj[int]);
-				}*/
-				
+			}).done(function(data) {				
 				var ret = data.ret.data;
-				
-				//console.log(ret.length);
-				
 				if(ret.length == 0){
-					//console.log('empty data');
 					hideSuggest(i);
 					callback(true);
 				}
@@ -493,7 +438,6 @@
 					var pos = $(i.tagger).offset();
 					var pad = $(i.tagger).css('padding-bottom');
 					pos.top = pos.top + $(i.tagger).height() + (parseInt(pad)*2) +1;
-			    	//console.log(parseInt(pad));
 			    	i.suggs.css({top:pos.top,left:pos.left});
 			    	i.suggs.show();
 			    	callback(false);
