@@ -1,6 +1,8 @@
 jQuery Tag a Friend
 =========
 
+Documentation and demos : http://astroanu.github.io/jquery-tag-a-friend2
+
 This is a plugin to tag friends just like in facebook. It supports multiple tags in text and also includes url detection. These are some of the key features.
 
   - Custom BB code format for templating text
