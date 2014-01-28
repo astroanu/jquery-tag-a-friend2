@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>jQuery - Tag a Friend 2 - A facebook postbox like tagging component</title>
+<link href="style.css" type="text/css" rel="stylesheet" >
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.tag.a.friend.2.rangy.min.js"></script>
+<script type="text/javascript">
+$(function() {
+    $('#postbox').tagfriends2({
+    	url:'\data.php',
+    	debug:true,
+    	scrape:function(url, ele){
+    		console.log('got url to fetch ' + url);
+    	}
+    });
+});
+</script>
+</head>
+<body>
+<section class="container">
+	<h1>jQuery - Tag a Friend 2<iframe id="github-btn" src="http://ghbtns.com/github-btn.html?user=astroanu&repo=jquery-tag-a-friend2&type=watch&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170" height="30"></iframe></h1>
+	<p>	jQuery - Tag a Friend 2 is a jQuery plugin that can turn any html input in to a facebook like post box.	</p>
+</section>
+<section class="container">
+	<h2>How it works</h2>
+	<p>Simply call tagfriends2 on any text input element and it will turn your element in to a taggable component. 
+	tagfriends2 adds an editable DIV before the element and keeps the original element on the document, making it possible for you to 
+	submit a form with ease. The plugin uses <a target="__blank" href="http://rangy.googlecode.com">Rangy</a> to maintain cross-browser consistancy with js ranges. </p>
+	<p>The output string will be rendered on to the original elements. The output text template can be customized.</p>
+</section>
+<section class="container">
+	<h2>Dependencies</h2>
+	<p>The following js fils and styles should be included.</p>
+	<h4>If including Rangy seperately:</h4>
+	<pre>
+&lt;link rel=&quot;stylesheet&quot; href=&quot;tag.a.friend.2.css&quot;&gt;
+&lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;rangy-core.js&quot;&gt;&lt;/script&gt;	
+&lt;script type=&quot;text/javascript&quot; src=&quot;jquery.tag.a.friend.2.min.js&quot;&gt;&lt;/script&gt;
+	</pre>
+	<h4>You may also use the Rangy included version</h4>
+	<pre>
+&lt;link rel=&quot;stylesheet&quot; href=&quot;tag.a.friend.2.css&quot;&gt;
+&lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;jquery.tag.a.friend.2.rangy.min.js&quot;&gt;&lt;/script&gt;	
+	</pre>
+</section>
+<section class="container">
+	<h2>Demos</h2>
+	<h4>Basic Usage</h4>
+	<p>The url must be passed for tagfriends2 to work.</p>
+	<pre>
+$('#someId').tagfriends2({
+	url:'\url_to_get_the_data.php'
+});	
+	</pre>
+</section>
+</body>
+</html>
