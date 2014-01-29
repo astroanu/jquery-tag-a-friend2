@@ -32,7 +32,10 @@
     	tagFormat:'[@%?]',
     	allowDuplicates:false,
     	debug:false,
-    	scrape:null
+    	scrape:null,
+    	sugTpl:'<li><a data-val="{id}" href="">{text}</a></li>',
+    	tagClass:'',
+    	suggClass:''
     };
     
     //indexOf for old browsers
@@ -56,10 +59,14 @@
         this.element = element;
         this.id = $(this.element).prop('id')+'-tagger';
         
-        this.tagger = $('<div id="'+this.id+'" class="tagfriends-wrapper" contentEditable="true"></div>');
-    	this.suggs = $('<ul class="tagfriends-tags-container"></ul>').hide();
+        this.tagger = $('<div id="'+this.id+'" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="tagfriends-wrapper" contentEditable="true"></div>');
+    	this.suggs = $('<ul class="tagfriends-tags-container"></ul>').addClass(options.suggClass).hide();
     	
     	$('body').append(this.suggs);
+    	
+    	if(options.debug === false){
+    		$(this.element).hide();
+    	}
         
         $(this.element).before(this.tagger);  
         
@@ -141,15 +148,20 @@
         	//console.log(instance.suggestionsHover);
         });
         
-        $(this.suggs).on('keypress keyup', 'a', function(e){
+        $(this.suggs).on('keypress keydown', 'a', function(e){
+        	console.log($(this).index());
         	if(e.keyCode == 38){
         		e.preventDefault();
         		$(this).parent().prev().children('a').focus();
+        		$(this.suggs).scrollTop($(this).prevAll().length * $(this).outerHeight());
+        		return false;
         	}
         	
         	if(e.keyCode == 40){
         		e.preventDefault();
         		$(this).parent().next().children('a').focus();
+        		$(this.suggs).scrollTop($(this).prevAll().length * $(this).outerHeight());
+        		return false;
         	}
         	
         	if(e.keyCode == 27){
@@ -279,12 +291,14 @@
 	    	if(i.range != null){
 		    	var nodes = i.range.getNodes();
 		    	var bb = ''; var ltxt = '';
+		    	i.tagged = [];
 		    	$.each(nodes, function(index, value){
 		    		switch ($(value).prop('tagName')) {
 						case 'SPAN':
 							if($(value).hasClass('tag')){
 								bb += i.opts.tagFormat.replace('%?', $(value).data('id'));
 								ltxt = $(value).text();
+								i.tagged.push($(value).data('id'));
 		    				}
 							break;
 			
@@ -313,7 +327,9 @@
     	    	i.tagged.splice(key, 1);
     	    	tag.remove();
     	    }
-    	}    	
+    	}  
+    	i.tagger.trigger('click');
+    	drawBBCode(i);	
     }
     
     var endSpacer = function(i){
@@ -340,6 +356,7 @@
     }
     
     var getClosestAfter = function(text, offset){
+    	text = text.split('');
     	for ( var int = offset; int < text.length; int++) {
 			if(text[int] == '@'){
 				return int;
@@ -406,6 +423,7 @@
 	    	spc.contentEditable = false;
 	    	$(spc).attr('unselectable', 'on');
 	    	$(spc).addClass('tag-inner');
+	    	$(spc).addClass(i.opts.tagClass);
 	    	spc.appendChild(document.createTextNode(txt));
 	    	sp1.appendChild(spc);
 	    	
@@ -415,11 +433,26 @@
 	    	var ds = getClosestBefore(i.range.toString(), i.range.toString().length-i.lastw.length);
 	    	var de = i.focusOffset;
 	    	
-	    	if(ds == 0 && i.range.toString().length - i.lastw.length > 0){
+	    	console.log(i.range.toString());
+	    	
+	    	if(ds == 0 && i.range.toString().length - i.lastw.length > 0){	    		
 	    		ds = i.range.toString().length - i.lastw.length;
 	    	}
 	    	
-	    	//console.log('delete ' + ds+ ' ' + de);
+	    	if(ds == 0){
+	    		var w = i.range.toString().split(' ');
+	    		var p = 0;
+	    		$.each(w, function(index, value){
+	    			p = p + value.length + 1;
+	    			var t = value.split('');
+	    			if(t[0] == '@'){
+	    				ds = p - value.length  - 1 ;
+	    				return;
+	    			}
+	    		});
+	    	}
+	    	
+	    	console.log('delete ' + ds + ' ' + de);
 	
 	    	i.range.setStart(i.focusNode, ds);
 	    	i.range.setEnd(i.focusNode, de);
@@ -444,6 +477,13 @@
     
     var hideSuggest = function(i){
     	i.suggs.hide();
+    }
+    
+    var tpl = function(tpl, object){
+    	for (var k in object) {
+    		tpl = tpl.replace('{'+k+'}', object[k]);
+        }
+    	return tpl;
     }
     
     var suggest = function(i, callback){
@@ -476,10 +516,11 @@
 				}
 				else{
 					$(i.suggs).empty();
-					
+					var li ='';
 					$.each(ret, function(index, v){
-						var li = $('<li><a data-val="'+v.id+'" href="">'+v.text+'</a></li>');
-						$(i.suggs).append(li);
+						if(i.tagged.indexOf(v.id) < 0){
+							$(i.suggs).append($(tpl(i.opts.sugTpl, v)));
+				    	}
 					});
 					
 					i.suggs.find('a').bind('click', function(e){
@@ -493,8 +534,8 @@
 					var pos = $(i.tagger).offset();
 					var pad = $(i.tagger).css('padding-bottom');
 					pos.top = pos.top + $(i.tagger).height() + (parseInt(pad)*2) +1;
-			    	//console.log(parseInt(pad));
-			    	i.suggs.css({top:pos.top,left:pos.left});
+					var w = $(i.tagger).width() + parseInt($(i.tagger).css('padding-left')) + parseInt($(i.tagger).css('padding-right'));
+			    	i.suggs.css({top:pos.top,left:pos.left,width:w});
 			    	i.suggs.show();
 			    	callback(false);
 				}
