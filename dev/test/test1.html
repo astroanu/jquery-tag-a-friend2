@@ -14,12 +14,27 @@ $(function() {
     $('#postbox').tagfriends2({
     	url:'\data.php',
     	debug:false,
-    	scrape:function(url, ele){
-    		console.log('got url to fetch ' + url);
+    	onScrape:function(url){
+    		$.ajax({
+	    		url: 'scraped.json',
+	    		type:'post',
+	    		data: {url:url}
+			}).done(function(data) {
+				var d = $('<div class="scraped-box"><button type="button" class="close" aria-hidden="true">&times;</button><table><tr><td><img src="'+data.data.image+'"</td><td><h1>'+data.data.title+'</h1><p>'+data.data.desc+'</p></td></tr></table></div>');
+				$('#postbox').before(d);
+				
+				$('.scraped-box').on('click', '.close', function(){
+			    	$('#postbox').tagfriends2('clearUrl');
+			    	$('.scraped-box').remove();
+			    });
+			});    		
+    	},
+    	onUpdate:function(data){
+    		//console.log(data);
     	},
     	suggClass:'suggetions',
     	sugTpl:'<li><a data-val="{id}" href=""><table><tr><td><img src="{avatar}"></td><td>{text}</td></tr></table></a></li>'
-    });
+    });    
 });
 </script>
 </head>

@@ -32,7 +32,8 @@
     	tagFormat:'[@%?]',
     	allowDuplicates:false,
     	debug:false,
-    	scrape:null,
+    	onScrape:null,
+    	onUpdate:null,
     	sugTpl:'<li><a data-val="{id}" href="">{text}</a></li>',
     	tagClass:'',
     	suggClass:''
@@ -149,7 +150,6 @@
         });
         
         $(this.suggs).on('keypress keydown', 'a', function(e){
-        	console.log($(this).index());
         	if(e.keyCode == 38){
         		e.preventDefault();
         		$(this).parent().prev().children('a').focus();
@@ -192,8 +192,7 @@
 		    	rangy.getSelection().removeAllRanges();
 		    	rangy.getSelection().addRange(instance.range);
 		    	
-	        	
-	        	if(isUrl(txt) === true && instance.link == ''){	        		
+	        	if(isUrl(txt) === true && instance.link == ''){	        
 	        		scrapeUrl(instance, txt);
 	        		instance.link = txt;
 	        	}	
@@ -256,6 +255,9 @@
 	        value:function(){
 	        	drawBBCode($(this).data('plugin_' + pluginName));
 	        	return $($(this).data('plugin_' + pluginName).element).val();
+	        },
+	        clearUrl:function(){
+	        	$(this).data('plugin_' + pluginName).link = '';
 	        }
 	    };
         // Iterate through each DOM element and return it
@@ -281,8 +283,9 @@
     }
     
     var scrapeUrl = function(i, url){
-		if(typeof i.opts.scrape == 'function'){
-			i.opts.scrape(url, i.tagger);
+		if(typeof i.opts.onScrape == 'function'){
+			console.log(2);
+			i.opts.onScrape(url);
 		}
     }
     
@@ -310,9 +313,17 @@
 					}
 		    	});
 		
-		
 				bb = bb.replace( /[\s\n\r]+/g, ' ' );
 				$(i.element).val(bb);
+				
+				if(typeof i.opts.onUpdate == 'function'){
+					i.opts.onUpdate({
+						text:i.range.toString(),
+						code:$(i.element).val(),
+						tags:i.tagged,
+						link:i.link
+					});
+				}
 	    	}
 	    }
 		catch(e){
