@@ -33,11 +33,13 @@ theme def
 .tagfriends-wrapper .tag-inner{background-color: #428bca;border-radius: .25em;color: #fff;}
 .tagfriends-wrapper .tag.active .tag-inner{background-color:#449EEB}
 
-.tagfriends-tags-container a:focus{background-color:#449EEB}
-.tagfriends-tags-container img{width: 25px;}
+.tagfriends-tags-container a{padding: 5px;}
+.tagfriends-tags-container a:focus, .tagfriends-tags-container a:hover{background-color:#449EEB;}
+.tagfriends-tags-container a:focus td, .tagfriends-tags-container a:hover td{color: #fff;}
+.tagfriends-tags-container img{width: 25px;border-radius:50%;}
 
 .scraped-box {padding-top: 10px;}
 .scraped-box td{vertical-align: top;}
-.scraped-box img{width: 80px;margin-right: 5px;}
+.scraped-box img{width: 80px;margin-right: 5px; }
 .scraped-box h1{font-size: 14px;margin: 0 0 5px 0;padding: 0;}
 .scraped-box p{margin: 0;padding: 0;font-size: 12px;}

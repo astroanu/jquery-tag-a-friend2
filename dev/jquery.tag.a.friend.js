@@ -132,6 +132,8 @@
         		hideSuggest(instance);
         	}
         	//console.log('suggdisd3: '+instance.suggestionsDisabled);
+        	
+        	onUpdate(instance);
         });
         
         $(this.suggs).on('scroll', function(e) {
@@ -168,6 +170,10 @@
         		hideSuggest(instance);
         		instance.range.setStartAfter(instance.range.anchorNode);
         	}
+        });
+        
+        $(this.suggs).on('hover', 'a', function(e){
+        	$(this).focus();
         });
         
         $(this.el).on('paste', function (e) {
@@ -315,19 +321,23 @@
 		
 				bb = bb.replace( /[\s\n\r]+/g, ' ' );
 				$(i.element).val(bb);
-				
-				if(typeof i.opts.onUpdate == 'function'){
-					i.opts.onUpdate({
-						text:i.range.toString(),
-						code:$(i.element).val(),
-						tags:i.tagged,
-						link:i.link
-					});
-				}
 	    	}
 	    }
 		catch(e){
 			if(i.opts.debug === true){/*console.log(e);*/}       		
+		}
+    }
+    
+    var onUpdate = function(i){
+    	if(typeof i.opts.onUpdate == 'function'){
+    		var t = $.trim(i.tagger.text());
+			i.opts.onUpdate({
+				count:t.length == 0 || t.length < 0 ? 0 : t.length,
+				text:i.range.toString(),
+				code:$(i.element).val(),
+				tags:i.tagged,
+				link:i.link
+			});
 		}
     }
     
@@ -337,6 +347,7 @@
     	    if (i.tagged[key] == tag.data('id')) {
     	    	i.tagged.splice(key, 1);
     	    	tag.remove();
+    	    	endSpacer(i)
     	    }
     	}  
     	i.tagger.trigger('click');
