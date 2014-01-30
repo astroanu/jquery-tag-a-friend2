@@ -391,7 +391,7 @@
     	if(i.focusNode != null){
 	    	var text = i.focusNode.nodeValue;
 	    	if(text == null) text = '';
-	    	var tags = text.split('@');
+	    	var tags = text.split(' @');
 	    	
 	    	var ws = getClosestBefore(text, i.focusOffset);
 	    	var we = getClosestAfter(text, i.focusOffset);
@@ -411,7 +411,7 @@
     	if(i.focusNode != null){
 	    	var text = i.focusNode.nodeValue;
 	    	if(text == null) text = '';
-	    	var tags = text.split('@');
+	    	var tags = text.split(' @');
 
 	    	var ws = getClosestBefore(text, i.focusOffset);
 	    	var we = getClosestAfter(text, i.focusOffset);
@@ -461,7 +461,7 @@
 	    		ds = i.range.toString().length - i.lastw.length;
 	    	}
 	    	
-	    	if(ds == 0){
+	    	//if(ds == 0){
 	    		var w = i.range.toString().split(' ');
 	    		var p = 0;
 	    		$.each(w, function(index, value){
@@ -472,7 +472,7 @@
 	    				return;
 	    			}
 	    		});
-	    	}
+	    	//}
 	    	
 	    	console.log('delete ' + ds + ' ' + de);
 	
