@@ -1,47 +1,37 @@
 /**
- * tagfriends2
- * Version: 2.0
- * URL: http://astroanu.github.io/jquery-tag-a-friend2/
- * Description: A facebook-like taggin interface 
- * Author: Anuradha Jayathilaka (https://github.com/astroanu)
- * Copyright: Copyright 2014 Anuradha Jayathilaka
+ * tagfriends2 Version: 2.0 URL: http://astroanu.github.io/jquery-tag-a-friend2/
+ * Description: A facebook-like taggin interface Author: Anuradha Jayathilaka
+ * (https://github.com/astroanu) Copyright: Copyright 2014 Anuradha Jayathilaka
  * License: MIT
  */
 
-// Plugin closure wrapper
-// Uses dollar, but calls jQuery to prevent conflicts with other libraries
-// Semicolon to prevent breakage with concatenation
-// Pass in window as local variable for efficiency (could do same for document)
-// Pass in undefined to prevent mutation in ES3
 ;(function($, document, window, undefined) {
-    // Optional, but considered best practice by some
     "use strict";
-
-    // Name the plug-in so it's only in one place
     var pluginName = 'tagfriends2';
-
-    // Default options for the plug-in as a simple object
     var defaults = {
 		url:'',
     	pageStart:1,
     	pageKey:'curpage',
     	pagePerKey:'pg_lmt',
-    	pagePer:10,
+    	pagePer:500,
     	queryKey:'q',
     	dataObj:['ret','data'],
     	tagFormat:'[@%?]',
     	allowDuplicates:false,
     	debug:false,
+    	scroller:null,
     	onScrape:null,
     	onUpdate:null,
+    	sugDelay:1000,
     	sugTpl:'<li><a data-val="{id}" href="">{text}</a></li>',
+    	extraClass:'',
     	tagClass:'',
-    	suggClass:''
+    	suggClass:'',
+    	placeholder:''
     };
-    
-    //indexOf for old browsers
+
     if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function (elt /*, from*/) {
+        Array.prototype.indexOf = function (elt) {
             var len = this.length >>> 0;
             var from = Number(arguments[1]) || 0;
             from = (from < 0) ? Math.ceil(from) : Math.floor(from);
@@ -54,26 +44,19 @@
         };
     }
 
-    // Plug-in constructor
-    // This is the boilerplate to set up the plug-in to keep our actual logic in one place
     function Plugin(element, options) {
         this.element = element;
-        this.id = $(this.element).prop('id')+'-tagger';
-        
-        this.tagger = $('<div id="'+this.id+'" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="tagfriends-wrapper" contentEditable="true"></div>');
+        this.tagger = $('<div autocomplete="off" autocorrect="off" autocapitalize="off" data-placeholder="'+options.placeholder+'" spellcheck="false" class="tagfriends-wrapper '+options.extraClass+'" contentEditable="true"></div>');
     	this.suggs = $('<ul class="tagfriends-tags-container"></ul>').addClass(options.suggClass).hide();
-    	
+    	$(this.element).hide();
     	$('body').append(this.suggs);
     	
-    	if(options.debug === false){
-    		$(this.element).hide();
-    	}
+    	if(options.debug == true){}
         
         $(this.element).before(this.tagger);  
         
         rangy.init();
         this.range = rangy.createRangyRange();
-        this.el = document.getElementById(this.id);
         this.anchorNode = this.anchorOffset = this.focusNode = this.focusOffset = 0;
         this.isCollapsed = true;
         this.suggestionsVisible = false;
@@ -86,7 +69,8 @@
 
         var instance = this;
 
-        $(this.el).bind('click keyup', function(e){
+        $(this.tagger).bind('click keyup', function(e){
+        	endSpacer(instance);
         	instance.range = rangy.createRangyRange();
         	instance.range.selectNodeContents(this);
         	
@@ -96,15 +80,7 @@
         	instance.focusNode = sel.focusNode;
         	instance.focusOffset = sel.focusOffset;
         	instance.isCollapsed = sel.isCollapsed;
-        	
-        	/*console.log('anchorNode ' + instance.anchorNode.nodeValue);
-        	console.log('anchorOffset ' + instance.anchorOffset);
-        	console.log('focusNode ' + instance.focusNode.nodeValue);
-        	console.log('focusOffset ' + instance.focusOffset);
-        	console.log('isCollapsed ' + instance.isCollapsed);*/
-        	//console.log('-----------------------------');
-        	//console.log('suggdisd: '+instance.suggestionsDisabled);        	
-        	
+
         	if(e.keyCode == 8 || e.keyCode == 39){
         		endSpacer(instance);
         	}
@@ -118,22 +94,22 @@
         	}
         	
         	isSuggestible(instance, function(d){
-        		//console.log('isSuggestible callback '+d);
         		instance.suggestionsDisabled = d;
         	});
-        	//console.log('suggdisd2: '+instance.suggestionsDisabled);
         	if(isTag(instance) === true && instance.isCollapsed === true && instance.suggestionsVisible === false){
         		suggest(instance, function(d){
-        			//console.log('suggest callback ' +d);
         			instance.suggestionsDisabled = d;
         		});
         	}
         	else{
         		hideSuggest(instance);
         	}
-        	//console.log('suggdisd3: '+instance.suggestionsDisabled);
-        	
+
         	onUpdate(instance);
+        });
+        
+        $(document).on('click', function(){
+        	hideSuggest(instance);
         });
         
         $(this.suggs).on('scroll', function(e) {
@@ -147,9 +123,7 @@
             mouseleave: function () {
             	instance.suggestionsHover = false;
             }
-        }, function(){
-        	//console.log(instance.suggestionsHover);
-        });
+        }, function(){ });
         
         $(this.suggs).on('keypress keydown', 'a', function(e){
         	if(e.keyCode == 38){
@@ -172,11 +146,11 @@
         	}
         });
         
-        $(this.suggs).on('hover', 'a', function(e){
-        	$(this).focus();
+        $(this.suggs).on('hover', function(e){
+        	$(this).blur();
         });
         
-        $(this.el).on('paste', function (e) {
+        $(this.tagger).on('paste', function (e) {
         	try{
 	        	e.preventDefault();
 	        	var txt = '';
@@ -204,23 +178,23 @@
 	        	}	
         	}
         	catch(e){
-        		if(instance.opts.debug === true){/*console.log(e);*/}       		
+        		if(instance.opts.debug === true){}       		
         	}
     	});
         
-        $(this.el).on('paste', '.tag', function(e){ 
+        $(this.tagger).on('paste', '.tag', function(e){ 
         	e.preventDefault();
         	return false;
         });
         
-        $(this.el).on('click', '.tag', function(){        	
+        $(this.tagger).on('click', '.tag', function(){        	
         	if($(this).hasClass('tag')){
         		$(this).parent().find('.tag').removeClass('active');
         		$(this).addClass('active');
         	}
         });
         
-        $(this.el).on('blur click keypress keyup', function(e){
+        $(this.tagger).on('blur click keypress keyup', function(e){
         	if(e.keyCode == 13){
         		e.preventDefault();
         	}
@@ -229,11 +203,18 @@
         		$(this).find('.tag').removeClass('active');
         	}
         });
+        
+        $(this.tagger).on('change keydown keypress input', function() {
+    		if (this.textContent) {
+    			this.dataset.divPlaceholderContent = 'true';
+    		}
+    		else {
+    			delete(this.dataset.divPlaceholderContent);
+    		}
+    	});
 
-        // Merge the options given by the user with the defaults
         this.options = $.extend({}, defaults, options);
 
-        // Attach data to the element
         this.$el      = $(element);
         this.$el.data(name, this);
 
@@ -247,33 +228,39 @@
     }
 
     Plugin.prototype = {
-        // Public functions accessible to users
-        init: function() {
-        	
-        }
+        init: function() {}
     };
 
     $.fn[pluginName] = function(methodOrOptions) {
     	var methods = {
-			refresh : function() { 
-				drawBBCode($(this).data('plugin_' + pluginName));
+			refresh : function(e,o) { 
+				drawBBCode($(e).data('plugin_' + pluginName));
 	        },
-	        value:function(){
-	        	drawBBCode($(this).data('plugin_' + pluginName));
-	        	return $($(this).data('plugin_' + pluginName).element).val();
+	        value:function(e,o){
+	        	drawBBCode($(e).data('plugin_' + pluginName));
+	        	return $($(e).data('plugin_' + pluginName).element).val();
 	        },
-	        clearUrl:function(){
-	        	$(this).data('plugin_' + pluginName).link = '';
+	        clearUrl:function(e,o){
+	        	$(e).data('plugin_' + pluginName).link = '';
+	        },
+	        clear:function(e,o){
+	        	clear($(e).data('plugin_' + pluginName));
+	        },
+	        focus:function(e,o){
+	        	focus($(e).data('plugin_' + pluginName));
+	        },
+	        blur:function(e,o){
+	        	blur($(e).data('plugin_' + pluginName));
 	        }
 	    };
-        // Iterate through each DOM element and return it
     	
     	if (methods[methodOrOptions] ) {
-            return methods[ methodOrOptions ].apply( this, Array.prototype.slice.call( arguments, 1 ));
+    		var f = methods[ methodOrOptions ];
+    		if(typeof f == 'function'){
+    			return f( this, Array.prototype.slice.call( arguments, 1 ));
+    		}
         } else if ( typeof methodOrOptions === 'object' || ! methodOrOptions ) {
-            // Default to "init"
         	return this.each(function() {
-                // prevent multiple instantiations
                 if (!$.data(this, 'plugin_' + pluginName)) {
                     $.data(this, 'plugin_' + pluginName, new Plugin(this, methodOrOptions));
                 }
@@ -283,6 +270,20 @@
         }        
     };
     
+    var blur = function(){
+    	$(i.tagger).blur();
+    }
+
+    var focus = function(i){
+    	$(i.tagger).focus();
+    }
+    
+    var clear = function(i){
+    	$(i.tagger).text('');
+    	$(i.element).empty();
+    	i.tagged= [];
+    }
+    
     var isUrl = function(s){
     	var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
     	return regexp.test(s);
@@ -290,7 +291,6 @@
     
     var scrapeUrl = function(i, url){
 		if(typeof i.opts.onScrape == 'function'){
-			console.log(2);
 			i.opts.onScrape(url);
 		}
     }
@@ -324,7 +324,7 @@
 	    	}
 	    }
 		catch(e){
-			if(i.opts.debug === true){/*console.log(e);*/}       		
+			if(i.opts.debug === true){}       		
 		}
     }
     
@@ -346,8 +346,10 @@
     	for (var key in i.tagged) {
     	    if (i.tagged[key] == tag.data('id')) {
     	    	i.tagged.splice(key, 1);
+    	    	var s = document.createTextNode(' ');
+			 	$(i.tagger).append(s);
     	    	tag.remove();
-    	    	endSpacer(i)
+    	    	endSpacer(i);
     	    }
     	}  
     	i.tagger.trigger('click');
@@ -355,16 +357,15 @@
     }
     
     var endSpacer = function(i){
-    	if(i.focusNode != null){
-	    	var str = i.focusNode.toString();
-		 	var len = str.length;
-		 	//console.log(str.charCodeAt( len-1));
-		 	//console.log(str.substr(len, -1));
-		 	if(str.substr(len, -1) != ' '){
-		 		var s = document.createTextNode(' ');
-			 	$(i.el).append(s);
-		 	}		 	
-    	}
+    	try{
+	    	i.range.setStart(i.anchorNode, i.anchorOffset);
+	    	i.range.setEnd(i.anchorNode, i.anchorOffset);	    	
+	    	var s = document.createTextNode(' ');
+		 	$(i.tagger).append(s);
+	    }
+		catch(e){
+			if(i.opts.debug === true){}       		
+		}
     }
     
     var getClosestBefore = function(text, offset){
@@ -399,14 +400,11 @@
 	    	if(we == ws) we = text.length;
 	    	
 	    	var neww = text.substring(ws, we);
-	    	
-	    	//console.log('new: '+ neww+' old: '+i.lastw);
-	    	
+
 	    	callback(neww == i.lastw); 
     	}
     }
 
-    // Private function that is only called by the plugin
     var isTag = function(i) {
     	if(i.focusNode != null){
 	    	var text = i.focusNode.nodeValue;
@@ -415,15 +413,11 @@
 
 	    	var ws = getClosestBefore(text, i.focusOffset);
 	    	var we = getClosestAfter(text, i.focusOffset);
-	    	
-	    	//console.log(ws + ' ' + we);
-	    	
+ 	
 	    	if(we == ws) we = text.length;
 	    	
 	    	i.lastw = text.substring(ws, we);
-	
-	    	//console.log('lastw: ' + i.lastw);
-	    	
+
 	    	var tl = $.trim(i.lastw);
 	    	return tl.substring(0, 1) == '@';
     	}
@@ -455,34 +449,26 @@
 	    	var ds = getClosestBefore(i.range.toString(), i.range.toString().length-i.lastw.length);
 	    	var de = i.focusOffset;
 	    	
-	    	console.log(i.range.toString());
-	    	
 	    	if(ds == 0 && i.range.toString().length - i.lastw.length > 0){	    		
 	    		ds = i.range.toString().length - i.lastw.length;
 	    	}
 	    	
-	    	//if(ds == 0){
-	    		var w = i.range.toString().split(' ');
-	    		var p = 0;
-	    		$.each(w, function(index, value){
-	    			p = p + value.length + 1;
-	    			var t = value.split('');
-	    			if(t[0] == '@'){
-	    				ds = p - value.length  - 1 ;
-	    				return;
-	    			}
-	    		});
-	    	//}
-	    	
-	    	console.log('delete ' + ds + ' ' + de);
-	
-	    	i.range.setStart(i.focusNode, ds);
-	    	i.range.setEnd(i.focusNode, de);
+    		var w = i.range.toString().split(' ');
+    		var p = 0;
+    		$.each(w, function(index, value){
+    			p = p + value.length + 1;
+    			var t = value.split('');
+    			if(t[0] == '@'){
+    				ds = p - value.length  - 1 ;
+    				return;
+    			}
+    		});
+
+	    	i.range.setStart(i.anchorNode, ds);
+	    	i.range.setEnd(i.anchorNode, de);
 	    	i.range.deleteContents();
 	    	
-	    	i.range.selectNodeContents(i.focusNode);
-	    	
-	    	endSpacer(i);
+	    	i.range.selectNodeContents(i.anchorNode);
 	    	
 	    	i.range.setStartAfter(sp1);
 	    	i.range.setEndAfter(sp1); 
@@ -493,7 +479,6 @@
 	    		i.tagged.push(val);
 	    	}	    	
 	    	i.tagger.trigger('click');
-	    	drawBBCode(i);	
     	}
     }
     
@@ -509,60 +494,64 @@
     }
     
     var suggest = function(i, callback){
-    	var q = i.lastw.substring(1);
-    	//console.log('sug disabled: '+i.suggestionsDisabled);
-    	if(q !== '' && i.suggestionsDisabled == false){
-	    	var data = {};    	
-	    	data[i.opts.pageKey] = i.opts.pageStart;
-	    	data[i.opts.pagePerKey] = i.opts.pagePer;
-	    	data[i.opts.queryKey] = q;
-	    	
-	    	$.ajax({
-	    		url: i.opts.url,
-	    		type:'post',
-	    		data: data
-			}).done(function(data) {
-				/*for ( var int = 0; int < i.opts.dataObj.length; int++){
-					data = data[i.opts.dataObj[int]];
-					console.log(i.opts.dataObj[int]);
-				}*/
-				
-				var ret = data.ret.data;
-				
-				//console.log(ret.length);
-				
-				if(ret.length == 0){
-					//console.log('empty data');
-					hideSuggest(i);
-					callback(true);
-				}
-				else{
-					$(i.suggs).empty();
-					var li ='';
-					$.each(ret, function(index, v){
-						if(i.tagged.indexOf(v.id) < 0){
-							$(i.suggs).append($(tpl(i.opts.sugTpl, v)));
-				    	}
-					});
-					
-					i.suggs.find('a').bind('click', function(e){
-				     	e.preventDefault();
-				      	addTag(i, $(this).data('val'), $(this).text());
-				      	hideSuggest(i);
-				      	drawBBCode(i);
-				       	return false;
-				    });
-					
-					var pos = $(i.tagger).offset();
-					var pad = $(i.tagger).css('padding-bottom');
-					pos.top = pos.top + $(i.tagger).height() + (parseInt(pad)*2) +1;
-					var w = $(i.tagger).width() + parseInt($(i.tagger).css('padding-left')) + parseInt($(i.tagger).css('padding-right'));
-			    	i.suggs.css({top:pos.top,left:pos.left,width:w});
-			    	i.suggs.show();
-			    	callback(false);
-				}
-			});
-    	}
+    	setTimeout(function(){
+    		var q = i.lastw.substring(1);
+    		q = q.split('_').join(' ');
+        	if(q !== '' && i.suggestionsDisabled == false){
+    	    	var data = {};    	
+    	    	data[i.opts.pageKey] = i.opts.pageStart;
+    	    	data[i.opts.pagePerKey] = i.opts.pagePer;
+    	    	data[i.opts.queryKey] = q;
+    	    	
+    	    	$.ajax({
+    	    		url: i.opts.url,
+    	    		type:'post',
+    	    		data: data
+    			}).done(function(data) {
+    				var ret = data.ret.data;
+    				if(ret.length == 0){
+    					hideSuggest(i);
+    					callback(true);
+    				}
+    				else{
+    					$(i.suggs).empty();
+    					var li ='';
+    					$.each(ret, function(index, v){
+    						
+    						var regx = new RegExp('/('+q+')/', 'gi');
+    						var matches = v.text.match(q);
+    						if (matches) {
+    							var r = v.text.substring(matches.index,q.length)
+    							v.text = v.text.replace(r, '<span>'+r+'</span>');
+    						}    						
+    						if(i.tagged.indexOf(v.id) < 0){    							
+    							$(i.suggs).append($(tpl(i.opts.sugTpl, v)));
+    				    	}
+    					});
+    					
+    					if(typeof i.opts.scroller == 'function'){
+    						i.opts.scroller($(i.suggs));
+    					}
+    					
+    					i.suggs.find('a').bind('click', function(e){
+    				     	e.preventDefault();
+    				      	addTag(i, $(this).data('val'), $(this).text());
+    				      	hideSuggest(i);
+    				      	drawBBCode(i);
+    				       	return false;
+    				    });
+    					
+    					var pos = $(i.tagger).offset();
+    					var pad = $(i.tagger).css('padding-bottom');
+    					pos.top = pos.top + $(i.tagger).height() + (parseInt(pad)*2) +1;
+    					var w = $(i.tagger).width() + parseInt($(i.tagger).css('padding-left')) + parseInt($(i.tagger).css('padding-right'));
+    			    	i.suggs.css({top:pos.top,left:pos.left,width:w});
+    			    	i.suggs.show();
+    			    	callback(false);
+    				}
+    			});
+        	}
+    	},i.opts.sugDelay);
     }
 
 })(jQuery, document, window);
