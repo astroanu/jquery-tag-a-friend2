@@ -1,1 +1,48 @@
 #github-btn{float: right;}
+.row{margin-bottom: 20px;}
+
+@CHARSET "UTF-8";
+.tagfriends-wrapper{padding: 3px;}
+.tagfriends-wrapper a{text-decoration: none;}
+.tagfriends-wrapper .tag{cursor: pointer;margin: 0 3px;display: inline-block;outline: 0px solid transparent;}
+.tagfriends-wrapper .tag:focus{outline: 0px solid transparent;}
+.tagfriends-wrapper .tag-inner{padding: 1px 3px;}
+.tagfriends-wrapper, .tagfriends-wrapper .tag{-webkit-border-radius: 3px;-moz-border-radius: 3px;border-radius: 3px;}
+.tagfriends-tags-container{position: absolute;z-index:99999;top:0;left:0}
+
+.tagfriends-wrapper[data-placeholder]:not(:focus):not([data-div-placeholder-content]):before {content: attr(data-placeholder);float: left;margin-left: 5px;color: gray;}
+
+.tagfriends-tags-container{margin: 0;padding: 0;max-height: 200px;overflow-y: auto;}
+.tagfriends-tags-container li{list-style-type: none;}
+.tagfriends-tags-container li a{display: block;}
+
+
+/*
+theme def
+*/
+.tagfriends-wrapper{border: thin solid #444;}
+.tagfriends-wrapper, .tagfriends-wrapper a{color: #000;}
+.tagfriends-wrapper .tag-inner{background-color: #28B8A7;border: thin solid #7E7E7E;}
+.tagfriends-wrapper .tag.active .tag-inner{background-color: #2FDBC7;}
+
+.tagfriends-tags-container{background-color: whitesmoke;}
+.tagfriends-tags-container li a.active, .tagfriends-tags-container li a:hover, .tagfriends-tags-container li a:focus{background-color: #c4c4c4;}
+
+
+.tagfriends-wrapper{cursor: text;background: none repeat scroll 0 0 #FAFAFA;border: 1px solid #DDDDDD;display: block;padding: 5px;resize: none;min-height: 20px;line-height: 20px;background-color: #fff;border-radius: 0;resize: none;padding: 6px 8px;border-top-color: #c0c0c0;}
+.tagfriends-wrapper:focus{outline: 0;border-color: #4d90fe;box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);-webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;}
+.tagfriends-tags-container{background: #fff;border-radius: 0 0 4px 4px;-moz-border-radius: 0 0 4px 4px;-webkit-border-radius: 0 0 4px 4px;-ms-border-radius: 0 0 4px 4px;box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);-moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);-webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);-ms-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);}
+
+.tagfriends-wrapper .tag-inner{background-color: #428bca;border-radius: .25em;color: #fff;}
+.tagfriends-wrapper .tag.active .tag-inner{background-color:#449EEB}
+
+.tagfriends-tags-container a{padding: 5px;}
+.tagfriends-tags-container a:focus, .tagfriends-tags-container a:hover{background-color:#449EEB;}
+.tagfriends-tags-container a:focus td, .tagfriends-tags-container a:hover td{color: #fff;}
+.tagfriends-tags-container img{width: 25px;border-radius:50%;}
+
+.scraped-box {padding-top: 10px;}
+.scraped-box td{vertical-align: top;}
+.scraped-box img{width: 80px;margin-right: 5px; }
+.scraped-box h1{font-size: 14px;margin: 0 0 5px 0;padding: 0;}
+.scraped-box p{margin: 0;padding: 0;font-size: 12px;}

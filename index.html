@@ -6,13 +6,16 @@
 <link href="style.css" type="text/css" rel="stylesheet" >
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script type="text/javascript" src="jquery.tag.a.friend.2.rangy.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="tag-a-friend2.js"></script>
 </head>
 <body>
 <section class="container">
-	<h1>jQuery - Tag a Friend 2<iframe id="github-btn" src="http://ghbtns.com/github-btn.html?user=astroanu&repo=jquery-tag-a-friend2&type=watch&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170" height="30"></iframe></h1>
+	<h1>jQuery - Tag a Friend 2
+	<iframe id="github-btn" src="http://ghbtns.com/github-btn.html?user=astroanu&repo=jquery-tag-a-friend2&type=watch&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170" height="30"></iframe>
+	<iframe id="github-btn" src="http://ghbtns.com/github-btn.html?user=astroanu&repo=jquery-tag-a-friend2&type=fork&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="100" height="30"></iframe>
+	</h1>
 	<p>	jQuery - Tag a Friend 2 is a jQuery plugin that can turn any html input in to a facebook like post box.	</p>
 </section>
 <section class="container">
@@ -43,28 +46,141 @@
 	<h2>Demos</h2>
 	<h4>Basic Usage</h4>
 	<p>The url must be passed for tagfriends2 to work.</p>
-	<table>
-		<tr>
-			<td>
+	<div class="col-md-12">
+		<div class="col-md-6">
 	<pre>
-$('#someId').tagfriends2({
-	url:'\url_to_get_the_data.php'
+$('#postbox1').tagfriends2({
+	url:'\data.json',
+	placeholder:'Type something'
 });	
 	</pre>			
-			</td>
-			<td>
-				<textarea id="postbox"></textarea>
+		</div>
+		<div class="col-md-6">
+			<div class="row">
+				<textarea id="postbox1"></textarea>
+			</div>
+			<div class="row">
+				<label>Resulting code</label>
+				<pre id="s1code"></pre>
 				<script type="text/javascript">
 				$(function() {
-				    $('#postbox').tagfriends2({
-				    	url:'\data.json'
+				    $('#postbox1').tagfriends2({
+				    	url:'\data.json',
+				    	placeholder:'Type something',
+			    		onUpdate:function(data){
+				    		$('#s1code').text(data.code);
+				    	}
 				    });
 				});
-				</script>			
-			</td>
+				</script>
+			</div>			
+		</div>
+	</div>
+	
+	<h4>Suggestions list templating</h4>
+	<p>Suggetions list can be customized using a template.</p>
+	<div class="col-md-12">
+		<div class="col-md-6">
+	<pre>
+$('#postbox2').tagfriends2({
+	url:'\data.json',
+	placeholder:'Type something',
+	sugTpl:'<li><a data-val="{id}" href="">{text}</a></li>'
+});	
+	</pre>			
+		</div>
+		<div class="col-md-6">
+			<textarea id="postbox2"></textarea>
+			
+			<script type="text/javascript">
+			$(function() {
+				$('#postbox2').tagfriends2({
+					url:'\data.json',
+					placeholder:'Type something',
+					sugTpl:'<li><a data-val="{id}" href=""><table><tr><td><img src="{avatar}"></td><td>{text}</td></tr></table></a></li>'
+				});	
+			});
+			</script>			
+		</div>
+	</div>
+</section>
+<section class="container">
+	<h2>Parameters</h2>
+	<table class="table">
+		<tr>
+			<td>url</td>
+			<td>Url to ajax fetch the data from</td>
 		</tr>
+		<tr>
+			<td>tagFormat</td>
+			<td>Template to format the resulting code using the selected ta. [@%?] will become [@some_unique_id]</td>
+		</tr>
+		<tr>
+			<td>allowDuplicates</td>
+			<td>True/False to allow or deny from adding the same tag more than once.</td>
+		</tr>
+		<tr>
+			<td>onScrape</td>
+			<td>Callback function to run when the user pastes a web url.</td>
+		</tr>
+		<tr>
+			<td>onUpdate</td>
+			<td>Callback function to run on each textbox update.</td>
+		</tr>
+		<tr>
+			<td>sugTpl</td>
+			<td>Templte to render each suggetion. The template must begin and end with &lt;li&gt; tags.</td>
+		</tr>
+		<tr>
+			<td>extraClass</td>
+			<td>Extra class(es) to be added to the tagger box.</td>
+		</tr>	
+		<tr>
+			<td>tagClass</td>
+			<td>Extra class(es) to be added to each tag.</td>
+		</tr>	
+		<tr>
+			<td>suggClass</td>
+			<td>Extra class(es) to be added to the suggestions list.</td>
+		</tr>		
+		<tr>
+			<td>placeholder</td>
+			<td>Text area placeholder.</td>
+		</tr>																
+	</table>	
+</section>
+<section class="container">
+	<h2>Methods</h2>
+	<p>Methods can be called on tagfriends2</p>
+	<pre>
+$('#postbox2').tagfriends2('refresh');	
+	</pre>
+	<table class="table">
+		<tr>
+			<td>refresh</td>
+			<td>Refresh the code for the tagbox</td>
+		</tr>
+		<tr>
+			<td>value</td>
+			<td>Returns the code for the tagbox</td>
+		</tr>
+		<tr>
+			<td>clear</td>
+			<td>Clear all values</td>
+		</tr>		
+		<tr>
+			<td>clearUrl</td>
+			<td>Clear the url value on the tagbox so another url could be fetch when pasted.</td>
+		</tr>
+		<tr>
+			<td>focus</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>blur</td>
+			<td></td>
+		</tr>												
 	</table>
-
 </section>
 </body>
 </html>
