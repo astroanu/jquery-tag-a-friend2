@@ -495,8 +495,8 @@
     
     var suggest = function(i, callback){
     	setTimeout(function(){
-    		var q = i.lastw.substring(1);
-    		q = q.split('_').join(' ');
+    		var q = i.lastw.substring(1).split(' ');
+    		q = q[0].split('_').join(' ');
         	if(q !== '' && i.suggestionsDisabled == false){
     	    	var data = {};    	
     	    	data[i.opts.pageKey] = i.opts.pageStart;
@@ -517,13 +517,6 @@
     					$(i.suggs).empty();
     					var li ='';
     					$.each(ret, function(index, v){
-    						
-    						var regx = new RegExp('/('+q+')/', 'gi');
-    						var matches = v.text.match(q);
-    						if (matches) {
-    							var r = v.text.substring(matches.index,q.length)
-    							v.text = v.text.replace(r, '<span>'+r+'</span>');
-    						}    						
     						if(i.tagged.indexOf(v.id) < 0){    							
     							$(i.suggs).append($(tpl(i.opts.sugTpl, v)));
     				    	}
