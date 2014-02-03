@@ -9,17 +9,6 @@
 <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type="text/javascript" src="jquery.tag.a.friend.2.rangy.min.js"></script>
-<script type="text/javascript">
-$(function() {
-    $('#postbox').tagfriends2({
-    	url:'\data.php',
-    	debug:true,
-    	scrape:function(url, ele){
-    		console.log('got url to fetch ' + url);
-    	}
-    });
-});
-</script>
 </head>
 <body>
 <section class="container">
@@ -54,11 +43,28 @@ $(function() {
 	<h2>Demos</h2>
 	<h4>Basic Usage</h4>
 	<p>The url must be passed for tagfriends2 to work.</p>
+	<table>
+		<tr>
+			<td>
 	<pre>
 $('#someId').tagfriends2({
 	url:'\url_to_get_the_data.php'
 });	
-	</pre>
+	</pre>			
+			</td>
+			<td>
+				<textarea id="postbox"></textarea>
+				<script type="text/javascript">
+				$(function() {
+				    $('#postbox').tagfriends2({
+				    	url:'\data.json'
+				    });
+				});
+				</script>			
+			</td>
+		</tr>
+	</table>
+
 </section>
 </body>
 </html>
