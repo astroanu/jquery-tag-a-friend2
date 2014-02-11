@@ -1,10 +1,3 @@
-/**
- * tagfriends2 Version: 2.0 URL: http://astroanu.github.io/jquery-tag-a-friend2/
- * Description: A facebook-like taggin interface Author: Anuradha Jayathilaka
- * (https://github.com/astroanu) Copyright: Copyright 2014 Anuradha Jayathilaka
- * License: MIT
- */
-
 ;(function($, document, window, undefined) {
     "use strict";
     var pluginName = 'tagfriends2';
