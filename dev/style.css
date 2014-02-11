@@ -28,7 +28,7 @@ theme def
 
 .con{padding: 10px;margin: 0 0 2px;border-bottom: 0;background: #f5f5f5; width: 500px;}
 
-.tagfriends-wrapper{cursor: text;background: none repeat scroll 0 0 #FAFAFA;border: 1px solid #DDDDDD;display: block;padding: 5px;resize: none;min-height: 20px;line-height: 20px;background-color: #fff;border-radius: 0;resize: none;padding: 6px 8px;border-top-color: #c0c0c0;}
+.tagfriends-wrapper{cursor: text;background: none repeat scroll 0 0 #FAFAFA;border: 1px solid #DDDDDD;display: block;padding: 5px;resize: none;min-height: 35px;line-height: 20px;background-color: #fff;border-radius: 0;resize: none;padding: 6px 8px;border-top-color: #c0c0c0;}
 .tagfriends-wrapper:focus{outline: 0;border-color: #4d90fe;box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);-webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;}
 .tagfriends-tags-container{background: #fff;border-radius: 0 0 4px 4px;-moz-border-radius: 0 0 4px 4px;-webkit-border-radius: 0 0 4px 4px;-ms-border-radius: 0 0 4px 4px;box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);-moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);-webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);-ms-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);}
 

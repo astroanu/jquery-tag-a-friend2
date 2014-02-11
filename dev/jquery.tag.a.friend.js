@@ -64,8 +64,9 @@
         this.suggestionsHover = false;
         this.activeTagNode = null;
         this.lastw = "";     
+        this.lastq = '';
         this.tagged = [];
-        this.link = '';
+        this.link = '';        
 
         var instance = this;
 
@@ -96,15 +97,16 @@
         	isSuggestible(instance, function(d){
         		instance.suggestionsDisabled = d;
         	});
-        	if(isTag(instance) === true && instance.isCollapsed === true && instance.suggestionsVisible === false){
-        		suggest(instance, function(d){
-        			instance.suggestionsDisabled = d;
-        		});
-        	}
-        	else{
-        		hideSuggest(instance);
-        	}
-
+        	setTimeout(function(){
+	        	if(isTag(instance) === true && instance.isCollapsed === true && instance.suggestionsVisible === false){
+	            	suggest(instance, function(d){
+            			instance.suggestionsDisabled = d;
+            		});
+	        	}
+	        	else{
+	        		hideSuggest(instance);
+	        	}
+        	},instance.opts.sugDelay);        		
         	onUpdate(instance);
         });
         
@@ -478,8 +480,9 @@
 	    	if(i.opts.allowDuplicates === false){
 	    		i.tagged.push(val);
 	    	}	    	
-	    	i.tagger.trigger('click');
+	    	i.tagger.trigger('focus');
     	}
+    	i.lastq = '';
     }
     
     var hideSuggest = function(i){
@@ -493,58 +496,58 @@
     	return tpl;
     }
     
-    var suggest = function(i, callback){
-    	setTimeout(function(){
-    		var q = i.lastw.substring(1).split(' ');
-    		q = q[0].split('_').join(' ');
-        	if(q !== '' && i.suggestionsDisabled == false){
-    	    	var data = {};    	
-    	    	data[i.opts.pageKey] = i.opts.pageStart;
-    	    	data[i.opts.pagePerKey] = i.opts.pagePer;
-    	    	data[i.opts.queryKey] = q;
-    	    	
-    	    	$.ajax({
-    	    		url: i.opts.url,
-    	    		type:'post',
-    	    		data: data
-    			}).done(function(data) {
-    				var ret = data.ret.data;
-    				if(ret.length == 0){
-    					hideSuggest(i);
-    					callback(true);
-    				}
-    				else{
-    					$(i.suggs).empty();
-    					var li ='';
-    					$.each(ret, function(index, v){
-    						if(i.tagged.indexOf(v.id) < 0){    							
-    							$(i.suggs).append($(tpl(i.opts.sugTpl, v)));
-    				    	}
-    					});
-    					
-    					if(typeof i.opts.scroller == 'function'){
-    						i.opts.scroller($(i.suggs));
-    					}
-    					
-    					i.suggs.find('a').bind('click', function(e){
-    				     	e.preventDefault();
-    				      	addTag(i, $(this).data('val'), $(this).text());
-    				      	hideSuggest(i);
-    				      	drawBBCode(i);
-    				       	return false;
-    				    });
-    					
-    					var pos = $(i.tagger).offset();
-    					var pad = $(i.tagger).css('padding-bottom');
-    					pos.top = pos.top + $(i.tagger).height() + (parseInt(pad)*2) +1;
-    					var w = $(i.tagger).width() + parseInt($(i.tagger).css('padding-left')) + parseInt($(i.tagger).css('padding-right'));
-    			    	i.suggs.css({top:pos.top,left:pos.left,width:w});
-    			    	i.suggs.show();
-    			    	callback(false);
-    				}
-    			});
-        	}
-    	},i.opts.sugDelay);
+    var suggest = function(i, callback){	
+		var q = i.lastw.substring(1).split(' ');
+		q = q[0].split('_').join(' ');
+    	if(q !== '' && i.suggestionsDisabled == false && i.lastq != q){
+	    	var data = {};    	
+	    	data[i.opts.pageKey] = i.opts.pageStart;
+	    	data[i.opts.pagePerKey] = i.opts.pagePer;
+	    	data[i.opts.queryKey] = q;
+	    	
+	    	$.ajax({
+	    		url: i.opts.url,
+	    		type:'post',
+	    		data: data
+			}).done(function(data) {
+				var ret = data.ret.data;
+				if(ret.length == 0){
+					hideSuggest(i);
+					callback(true);
+				}
+				else{
+					$(i.suggs).empty();
+					var li ='';
+					$.each(ret, function(index, v){
+						if(i.tagged.indexOf(v.id) < 0){    							
+							$(i.suggs).append($(tpl(i.opts.sugTpl, v)));
+				    	}
+					});
+					
+					if(typeof i.opts.scroller == 'function'){
+						i.opts.scroller($(i.suggs));
+					}
+					
+					i.suggs.find('a').bind('click', function(e){
+				     	e.preventDefault();
+				      	addTag(i, $(this).data('val'), $(this).text());
+				      	hideSuggest(i);
+				      	drawBBCode(i);
+				       	return false;
+				    });
+					
+					i.lastq = q;
+					
+					var pos = $(i.tagger).offset();
+					var pad = $(i.tagger).css('padding-bottom');
+					pos.top = pos.top + $(i.tagger).height() + (parseInt(pad)*2) +1;
+					var w = $(i.tagger).width() + parseInt($(i.tagger).css('padding-left')) + parseInt($(i.tagger).css('padding-right'));
+			    	i.suggs.css({top:pos.top,left:pos.left,width:w});
+			    	i.suggs.show();
+			    	callback(false);
+				}
+			});
+    	}
     }
 
 })(jQuery, document, window);
